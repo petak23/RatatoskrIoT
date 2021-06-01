@@ -26,13 +26,16 @@ class ResultSet implements \Iterator, IRowContainer
 	/** @var \PDOStatement|null */
 	private $pdoStatement;
 
-	/** @var IRow|false */
+	/** @var callable(array, ResultSet): array */
+	private $normalizer;
+
+	/** @var Row|false */
 	private $result;
 
 	/** @var int */
 	private $resultKey = -1;
 
-	/** @var IRow[] */
+	/** @var Row[] */
 	private $results;
 
 	/** @var float */
@@ -48,12 +51,13 @@ class ResultSet implements \Iterator, IRowContainer
 	private $types;
 
 
-	public function __construct(Connection $connection, string $queryString, array $params)
+	public function __construct(Connection $connection, string $queryString, array $params, callable $normalizer = null)
 	{
 		$time = microtime(true);
 		$this->connection = $connection;
 		$this->queryString = $queryString;
 		$this->params = $params;
+		$this->normalizer = $normalizer;
 
 		try {
 			if (substr($queryString, 0, 2) === '::') {
@@ -70,7 +74,7 @@ class ResultSet implements \Iterator, IRowContainer
 				@$this->pdoStatement->execute(); // @ PHP generates warning when ATTR_ERRMODE = ERRMODE_EXCEPTION bug #73878
 			}
 		} catch (\PDOException $e) {
-			$e = $connection->getSupplementalDriver()->convertException($e);
+			$e = $connection->getDriver()->convertException($e);
 			$e->queryString = $queryString;
 			$e->params = $params;
 			throw $e;
@@ -88,7 +92,7 @@ class ResultSet implements \Iterator, IRowContainer
 	/**
 	 * @internal
 	 */
-	public function getPdoStatement(): \PDOStatement
+	public function getPdoStatement(): ?\PDOStatement
 	{
 		return $this->pdoStatement;
 	}
@@ -118,53 +122,27 @@ class ResultSet implements \Iterator, IRowContainer
 	}
 
 
+	public function getColumnTypes(): array
+	{
+		if ($this->types === null) {
+			$this->types = $this->connection->getDriver()->getColumnTypes($this->pdoStatement);
+		}
+		return $this->types;
+	}
+
+
 	public function getTime(): float
 	{
 		return $this->time;
 	}
 
 
-	/**
-	 * Normalizes result row.
-	 */
+	/** @internal */
 	public function normalizeRow(array $row): array
 	{
-		if ($this->types === null) {
-			$this->types = $this->connection->getSupplementalDriver()->getColumnTypes($this->pdoStatement);
-		}
-
-		foreach ($this->types as $key => $type) {
-			$value = $row[$key];
-			if ($value === null || $value === false || $type === IStructure::FIELD_TEXT) {
-				// do nothing
-			} elseif ($type === IStructure::FIELD_INTEGER) {
-				$row[$key] = is_float($tmp = $value * 1) ? $value : $tmp;
-
-			} elseif ($type === IStructure::FIELD_FLOAT) {
-				if (is_string($value) && ($pos = strpos($value, '.')) !== false) {
-					$value = rtrim(rtrim($pos === 0 ? "0$value" : $value, '0'), '.');
-				}
-				$float = (float) $value;
-				$row[$key] = (string) $float === $value ? $float : $value;
-
-			} elseif ($type === IStructure::FIELD_BOOL) {
-				$row[$key] = ((bool) $value) && $value !== 'f' && $value !== 'F';
-
-			} elseif ($type === IStructure::FIELD_DATETIME || $type === IStructure::FIELD_DATE || $type === IStructure::FIELD_TIME) {
-				$row[$key] = new Nette\Utils\DateTime($value);
-
-			} elseif ($type === IStructure::FIELD_TIME_INTERVAL) {
-				preg_match('#^(-?)(\d+)\D(\d+)\D(\d+)(\.\d+)?$#D', $value, $m);
-				$row[$key] = new \DateInterval("PT$m[2]H$m[3]M$m[4]S");
-				$row[$key]->f = isset($m[5]) ? (float) $m[5] : 0.0;
-				$row[$key]->invert = (int) (bool) $m[1];
-
-			} elseif ($type === IStructure::FIELD_UNIX_TIMESTAMP) {
-				$row[$key] = Nette\Utils\DateTime::from($value);
-			}
-		}
-
-		return $row;
+		return $this->normalizer
+			? ($this->normalizer)($row, $this)
+			: $row;
 	}
 
 
@@ -186,7 +164,7 @@ class ResultSet implements \Iterator, IRowContainer
 	public function rewind(): void
 	{
 		if ($this->result === false) {
-			throw new Nette\InvalidStateException(__CLASS__ . ' implements only one way iterator.');
+			throw new Nette\InvalidStateException(self::class . ' implements only one way iterator.');
 		}
 	}
 
@@ -219,13 +197,10 @@ class ResultSet implements \Iterator, IRowContainer
 	}
 
 
-	/********************* interface IRowContainer ****************d*g**/
-
-
 	/**
-	 * @inheritDoc
+	 * Fetches single row object.
 	 */
-	public function fetch(): ?IRow
+	public function fetch(): ?Row
 	{
 		$data = $this->pdoStatement ? $this->pdoStatement->fetch() : null;
 		if (!$data) {
@@ -250,7 +225,8 @@ class ResultSet implements \Iterator, IRowContainer
 
 
 	/**
-	 * @inheritDoc
+	 * Fetches single field.
+	 * @return mixed
 	 */
 	public function fetchField($column = 0)
 	{
@@ -273,7 +249,9 @@ class ResultSet implements \Iterator, IRowContainer
 
 
 	/**
-	 * @inheritDoc
+	 * Fetches all rows as associative array.
+	 * @param  string|int  $key  column name used for an array key or null for numeric index
+	 * @param  string|int  $value  column name used for an array value or null for the whole row
 	 */
 	public function fetchPairs($key = null, $value = null): array
 	{
@@ -282,7 +260,8 @@ class ResultSet implements \Iterator, IRowContainer
 
 
 	/**
-	 * @inheritDoc
+	 * Fetches all rows.
+	 * @return Row[]
 	 */
 	public function fetchAll(): array
 	{
@@ -294,7 +273,8 @@ class ResultSet implements \Iterator, IRowContainer
 
 
 	/**
-	 * @inheritDoc
+	 * Fetches all rows and returns associative tree.
+	 * @param  string  $path  associative descriptor
 	 */
 	public function fetchAssoc(string $path): array
 	{

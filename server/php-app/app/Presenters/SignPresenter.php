@@ -16,6 +16,13 @@ class SignPresenter extends Nette\Application\UI\Presenter
     /** @persistent */
 	public $backlink = '';
 
+    public $links;
+
+    public function __construct(\App\Services\Config $config )
+    {
+        $this->links = $config->links;
+    }
+
     public function actionIn( $username=NULL ): void
     {
         $response = $this->getHttpResponse();
@@ -23,6 +30,11 @@ class SignPresenter extends Nette\Application\UI\Presenter
         $response->setExpiration('1 sec'); 
 
         $this->username = $username;
+    }
+
+    public function renderIn(): void
+    {
+        $this->template->links = $this->links;
     }
     
 	protected function createComponentSignInForm(): Form
@@ -36,6 +48,7 @@ class SignPresenter extends Nette\Application\UI\Presenter
 			->setRequired('Prosím vyplňte své heslo.');
 
         $form->addSubmit('send', 'Přihlásit')
+            ->setAttribute('class', 'btn btn-outline-success')
             ->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
 
         $form->onSuccess[] = [$this, 'signInFormSucceeded'];

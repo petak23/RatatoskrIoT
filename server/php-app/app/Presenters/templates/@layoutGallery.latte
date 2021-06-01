@@ -43,9 +43,9 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div  class="container-fluid px-0 mx-0 px-md-2 px-lg-4" style="max-width: {$maxW}px;">
-					    <div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+                        <div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
 
-	{include content}
+                        {include content}
 
 					</div>
                 </main>
@@ -53,17 +53,15 @@
                     <div class="container-fluid">
                         <div class="d-flex align-items-center justify-content-between small">
                             <div class="text-muted">RatatoskrIoT</div>
-                            <div>
-                                {foreach $links as $link }
-                                    {if (!$iterator->first) }
-                                        &middot;
-                                    {/if}
-                                    {if (strlen($link['link'])>0) }
-                                        <a href="{$link['link']}">{$link['name']}</a>
-                                    {else}
-                                        {$link['name']}
-                                    {/if}
-                                {/foreach}
+                            <div n:foreach="$links as $link">
+                                {if (!$iterator->first) }
+                                    &middot;
+                                {/if}
+                                {if (strlen($link['link'])>0) }
+                                    <a href="{$link['link']}">{$link['name']}</a>
+                                {else}
+                                    {$link['name']}
+                                {/if}
                             </div>
                         </div>
                     </div>
@@ -77,15 +75,15 @@
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 			<script src="../../../js/scripts.js"></script>
 
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-289403-4");
-pageTracker._trackPageview();
-} catch(err) {}</script>
+        {*<script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script>
+        <script type="text/javascript">
+        try {
+        var pageTracker = _gat._getTracker("UA-289403-4");
+        pageTracker._trackPageview();
+        } catch(err) {}</script>*}
 
 		{/block}
 

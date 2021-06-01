@@ -13,7 +13,8 @@ class Bootstrap
 	{
 		$configurator = new Configurator;
 
-		$configurator->setDebugMode('192.168.32.242'); // enable for your remote IP  '94.113.255.162'
+		//$configurator->setDebugMode('192.168.32.242'); // enable for your remote IP  '94.113.255.162'
+		$configurator->setDebugMode(TRUE);
 		$configurator->enableTracy(__DIR__ . '/../log');
 
 		$configurator->setTimeZone('Europe/Prague');
@@ -24,7 +25,10 @@ class Bootstrap
 			->register();
 
 		$configurator->addConfig(__DIR__ . '/config/common.neon');
-		$configurator->addConfig(__DIR__ . '/config/local.neon');
+		$configurator->addConfig(__DIR__ . '/config/config.neon');
+		if(file_exists(__DIR__ . '/config/local.neon')){
+      $configurator->addConfig(__DIR__ . '/config/local.neon');
+    }
 
 		return $configurator;
 	}

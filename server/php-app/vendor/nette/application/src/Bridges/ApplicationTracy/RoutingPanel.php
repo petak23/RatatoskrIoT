@@ -41,22 +41,11 @@ final class RoutingPanel implements Tracy\IBarPanel
 	private $source;
 
 
-	public static function initializePanel(Nette\Application\Application $application): void
-	{
-		$blueScreen = Tracy\Debugger::getBlueScreen();
-		$blueScreen->addPanel(function (?\Throwable $e) use ($application, $blueScreen): ?array {
-			$dumper = $blueScreen->getDumper();
-			return $e ? null : [
-				'tab' => 'Nette Application',
-				'panel' => '<h3>Requests</h3>' . $dumper($application->getRequests())
-					. '<h3>Presenter</h3>' . $dumper($application->getPresenter()),
-			];
-		});
-	}
-
-
-	public function __construct(Routing\Router $router, Nette\Http\IRequest $httpRequest, Nette\Application\IPresenterFactory $presenterFactory)
-	{
+	public function __construct(
+		Routing\Router $router,
+		Nette\Http\IRequest $httpRequest,
+		Nette\Application\IPresenterFactory $presenterFactory
+	) {
 		$this->router = $router;
 		$this->httpRequest = $httpRequest;
 		$this->presenterFactory = $presenterFactory;
@@ -96,17 +85,23 @@ final class RoutingPanel implements Tracy\IBarPanel
 	/**
 	 * Analyses simple route.
 	 */
-	private function analyse(Routing\Router $router, string $module = '', bool $parentMatches = true, int $level = -1): void
-	{
+	private function analyse(
+		Routing\Router $router,
+		string $module = '',
+		bool $parentMatches = true,
+		int $level = -1,
+		int $flag = 0
+	): void {
 		if ($router instanceof Routing\RouteList) {
 			try {
 				$parentMatches = $parentMatches && $router->match($this->httpRequest) !== null;
-			} catch (\Exception $e) {
+			} catch (\Throwable $e) {
 			}
 			$next = count($this->routers);
 			$parentModule = $module . ($router instanceof Nette\Application\Routers\RouteList ? $router->getModule() : '');
-			foreach ($router->getRouters() as $subRouter) {
-				$this->analyse($subRouter, $parentModule, $parentMatches, $level + 1);
+			$flags = $router->getFlags();
+			foreach ($router->getRouters() as $i => $subRouter) {
+				$this->analyse($subRouter, $parentModule, $parentMatches, $level + 1, $flags[$i]);
 			}
 
 			if ($info = $this->routers[$next] ?? null) {
@@ -118,11 +113,13 @@ final class RoutingPanel implements Tracy\IBarPanel
 			return;
 		}
 
-		$matched = 'no';
+		$matched = $flag & Routing\RouteList::ONE_WAY ? 'oneway' : 'no';
 		$params = $e = null;
 		try {
-			$params = $parentMatches ? $router->match($this->httpRequest) : null;
-		} catch (\Exception $e) {
+			$params = $parentMatches
+				? $router->match($this->httpRequest)
+				: null;
+		} catch (\Throwable $e) {
 			$matched = 'error';
 		}
 		if ($params !== null) {
@@ -174,6 +171,8 @@ final class RoutingPanel implements Tracy\IBarPanel
 			}
 		}
 
-		$this->source = isset($method) && $rc->hasMethod($method) ? $rc->getMethod($method) : $rc;
+		$this->source = isset($method) && $rc->hasMethod($method)
+			? $rc->getMethod($method)
+			: $rc;
 	}
 }

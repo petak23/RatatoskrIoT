@@ -26,11 +26,22 @@ class EnrollPresenter extends Nette\Application\UI\Presenter
     /** @persistent */
     public $email = "";
 
-    public function __construct( \App\Services\EnrollDataSource $datasource, \App\Services\MailService $mailsv, Nette\Security\Passwords $passwords  )
+    public $links;
+
+    public function __construct( \App\Services\EnrollDataSource $datasource, 
+                                \App\Services\MailService $mailsv,
+                                Nette\Security\Passwords $passwords,
+                                \App\Services\Config $config   )
 	{
         $this->datasource = $datasource;
         $this->passwords = $passwords;
         $this->mailService = $mailsv;
+        $this->links = $config->links;
+    }
+
+    public function beforeRender(): void
+    {
+        $this->template->links = $this->links;
     }
 
     protected function createComponentEnrollForm(): Form
@@ -46,7 +57,7 @@ class EnrollPresenter extends Nette\Application\UI\Presenter
 
         $form->addPassword('password2', 'Opakujte heslo:')
             ->setOption('description', 'Zadejte heslo ještě jednou.')
-	        ->addRule($form::EQUAL, 'Heslo musí být zadáno dvakrát stejně!', $form['password'])
+            ->addRule($form::EQUAL, 'Heslo musí být zadáno dvakrát stejně!', $form['password'])
             ->setRequired();
 
         $form->addSubmit('send', 'Založit účet')
@@ -54,6 +65,8 @@ class EnrollPresenter extends Nette\Application\UI\Presenter
 
         $form->onSuccess[] = [$this, 'enrollFormSucceeded'];
         
+        $renderer = $form->getRenderer();
+        $renderer->wrappers['control']['description'] = 'div class="alert alert-info font-italic"';
 		return $form;
     }
 

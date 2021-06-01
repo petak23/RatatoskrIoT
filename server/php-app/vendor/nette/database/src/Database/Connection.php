@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Nette\Database;
 
 use Nette;
+use Nette\Utils\Arrays;
 use PDO;
 use PDOException;
 
@@ -21,11 +22,11 @@ class Connection
 {
 	use Nette\SmartObject;
 
-	/** @var callable[]&(callable(Connection $connection): void)[]; Occurs after connection is established */
-	public $onConnect;
+	/** @var array<callable(self): void>  Occurs after connection is established */
+	public $onConnect = [];
 
-	/** @var callable[]&(callable(Connection $connection, ResultSet|DriverException $result): void)[]; Occurs after query is executed */
-	public $onQuery;
+	/** @var array<callable(self, ResultSet|DriverException): void>  Occurs after query is executed */
+	public $onQuery = [];
 
 	/** @var array */
 	private $params;
@@ -33,7 +34,7 @@ class Connection
 	/** @var array */
 	private $options;
 
-	/** @var ISupplementalDriver */
+	/** @var Driver */
 	private $driver;
 
 	/** @var SqlPreprocessor */
@@ -42,8 +43,14 @@ class Connection
 	/** @var PDO|null */
 	private $pdo;
 
+	/** @var callable(array, ResultSet): array */
+	private $rowNormalizer = [Helpers::class, 'normalizeRow'];
+
 	/** @var string|null */
 	private $sql;
+
+	/** @var int */
+	private $transactionDepth = 0;
 
 
 	public function __construct(string $dsn, string $user = null, string $password = null, array $options = null)
@@ -76,7 +83,7 @@ class Connection
 		$this->driver = new $class;
 		$this->preprocessor = new SqlPreprocessor($this);
 		$this->driver->initialize($this, $this->options);
-		$this->onConnect($this);
+		Arrays::invoke($this->onConnect, $this);
 	}
 
 
@@ -106,10 +113,25 @@ class Connection
 	}
 
 
-	public function getSupplementalDriver(): ISupplementalDriver
+	public function getDriver(): Driver
 	{
 		$this->connect();
 		return $this->driver;
+	}
+
+
+	/** @deprecated use getDriver() */
+	public function getSupplementalDriver(): Driver
+	{
+		$this->connect();
+		return $this->driver;
+	}
+
+
+	public function setRowNormalizer(?callable $normalizer): self
+	{
+		$this->rowNormalizer = $normalizer;
+		return $this;
 	}
 
 
@@ -136,19 +158,60 @@ class Connection
 
 	public function beginTransaction(): void
 	{
+		if ($this->transactionDepth !== 0) {
+			throw new \LogicException(__METHOD__ . '() call is forbidden inside a transaction() callback');
+		}
+
 		$this->query('::beginTransaction');
 	}
 
 
 	public function commit(): void
 	{
+		if ($this->transactionDepth !== 0) {
+			throw new \LogicException(__METHOD__ . '() call is forbidden inside a transaction() callback');
+		}
+
 		$this->query('::commit');
 	}
 
 
 	public function rollBack(): void
 	{
+		if ($this->transactionDepth !== 0) {
+			throw new \LogicException(__METHOD__ . '() call is forbidden inside a transaction() callback');
+		}
+
 		$this->query('::rollBack');
+	}
+
+
+	/**
+	 * @return mixed
+	 */
+	public function transaction(callable $callback)
+	{
+		if ($this->transactionDepth === 0) {
+			$this->beginTransaction();
+		}
+
+		$this->transactionDepth++;
+		try {
+			$res = $callback($this);
+		} catch (\Throwable $e) {
+			$this->transactionDepth--;
+			if ($this->transactionDepth === 0) {
+				$this->rollback();
+			}
+			throw $e;
+		}
+
+		$this->transactionDepth--;
+		if ($this->transactionDepth === 0) {
+			$this->commit();
+		}
+
+		return $res;
 	}
 
 
@@ -159,12 +222,12 @@ class Connection
 	{
 		[$this->sql, $params] = $this->preprocess($sql, ...$params);
 		try {
-			$result = new ResultSet($this, $this->sql, $params);
+			$result = new ResultSet($this, $this->sql, $params, $this->rowNormalizer);
 		} catch (PDOException $e) {
-			$this->onQuery($this, $e);
+			Arrays::invoke($this->onQuery, $this, $e);
 			throw $e;
 		}
-		$this->onQuery($this, $result);
+		Arrays::invoke($this->onQuery, $this, $result);
 		return $result;
 	}
 
@@ -199,7 +262,7 @@ class Connection
 	/**
 	 * Shortcut for query()->fetch()
 	 */
-	public function fetch(string $sql, ...$params): ?IRow
+	public function fetch(string $sql, ...$params): ?Row
 	{
 		return $this->query($sql, ...$params)->fetch();
 	}

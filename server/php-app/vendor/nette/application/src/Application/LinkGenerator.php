@@ -52,7 +52,9 @@ final class LinkGenerator
 		[, $presenter, $action, $frag] = $m;
 
 		try {
-			$class = $this->presenterFactory ? $this->presenterFactory->getPresenterClass($presenter) : null;
+			$class = $this->presenterFactory
+				? $this->presenterFactory->getPresenterClass($presenter)
+				: null;
 		} catch (InvalidPresenterException $e) {
 			throw new UI\InvalidLinkException($e->getMessage(), 0, $e);
 		}
@@ -84,8 +86,8 @@ final class LinkGenerator
 		$url = $this->router->constructUrl($params, $this->refUrl);
 		if ($url === null) {
 			unset($params[UI\Presenter::ACTION_KEY], $params[UI\Presenter::PRESENTER_KEY]);
-			$params = urldecode(http_build_query($params, '', ', '));
-			throw new UI\InvalidLinkException("No route for $dest($params)");
+			$paramsDecoded = urldecode(http_build_query($params, '', ', '));
+			throw new UI\InvalidLinkException("No route for $dest($paramsDecoded)");
 		}
 		return $url . $frag;
 	}

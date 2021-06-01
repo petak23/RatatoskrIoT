@@ -15,13 +15,13 @@ use Nette;
 /**
  * Web form adapted for Presenter.
  */
-class Form extends Nette\Forms\Form implements ISignalReceiver
+class Form extends Nette\Forms\Form implements SignalReceiver
 {
-	/** @var callable[]&(callable(Form $sender): void)[]; Occurs when form is attached to presenter */
-	public $onAnchor;
+	/** @var array<callable(self): void>  Occurs when form is attached to presenter */
+	public $onAnchor = [];
 
 	/** @var bool */
-	private $sameSiteProtection = true;
+	protected $crossOrigin = false;
 
 
 	/**
@@ -57,7 +57,7 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 				}
 			}
 
-			$this->onAnchor($this);
+			Nette\Utils\Arrays::invoke($this->onAnchor, $this);
 		});
 	}
 
@@ -103,9 +103,16 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 	/**
 	 * Disables CSRF protection using a SameSite cookie.
 	 */
+	public function allowCrossOrigin(): void
+	{
+		$this->crossOrigin = true;
+	}
+
+
+	/** @deprecated  use allowCrossOrigin() */
 	public function disableSameSiteProtection(): void
 	{
-		$this->sameSiteProtection = false;
+		$this->crossOrigin = true;
 	}
 
 
@@ -124,11 +131,9 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 			return null;
 		}
 
-		if ($this->isMethod('post')) {
-			return Nette\Utils\Arrays::mergeTree($request->getPost(), $request->getFiles());
-		} else {
-			return $request->getParameters();
-		}
+		return $this->isMethod('post')
+			? Nette\Utils\Arrays::mergeTree($request->getPost(), $request->getFiles())
+			: $request->getParameters();
 	}
 
 
@@ -143,7 +148,7 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 	}
 
 
-	/********************* interface ISignalReceiver ****************d*g**/
+	/********************* interface SignalReceiver ****************d*g**/
 
 
 	/**
@@ -152,10 +157,10 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 	public function signalReceived(string $signal): void
 	{
 		if ($signal !== 'submit') {
-			$class = get_class($this);
+			$class = static::class;
 			throw new BadSignalException("Missing handler for signal '$signal' in $class.");
 
-		} elseif ($this->sameSiteProtection && !$this->getPresenter()->getHttpRequest()->isSameSite()) {
+		} elseif (!$this->crossOrigin && !$this->getPresenter()->getHttpRequest()->isSameSite()) {
 			$this->getPresenter()->detectedCsrf();
 
 		} elseif (!$this->getPresenter()->getRequest()->hasFlag(Nette\Application\Request::RESTORED)) {

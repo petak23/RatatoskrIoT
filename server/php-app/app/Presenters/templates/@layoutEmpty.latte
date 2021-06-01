@@ -5,21 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="robots" content="noindex, nofollow">
     <title>{ifset title}{include title|stripHtml} | {/ifset}RatatoskrIoT</title>
+    <link href="{$basePath}/css/styles.css" rel="stylesheet" />
+    <link href="{$basePath}/css/signin.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-{foreach $flashes as $flash}
-    {first}
-        Informace:
-        <ul>
-    {/first}
-    <li><div class="alert flash alert-{$flash->type} {$flash->type}"><b>{$flash->message}</b></div>
-    {last}
-        </ul>
-    {/last}
-{/foreach}
+    <div class="center-content">
+    {foreach $flashes as $flash}
+        {first}
+            <ul>
+        {/first}
+        <li><div class="alert flash alert-{$flash->type} {$flash->type}"><b>{$flash->message}</b></div>
+        {last}
+            </ul>
+        {/last}
+    {/foreach}
 
-{include content}
-
+    {include content}
+    </div>
+    <footer class="mt-auto py-3">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between small">
+                <div class="text-muted">RatatoskrIoT</div>
+                <div n:inner-foreach="$links as $link">
+                    {first}
+                        &middot;
+                    {/first}
+                    {if (strlen($link['link'])>0) }
+                        <a href="{$link['link']}">{$link['name']}</a>
+                    {else}
+                        {$link['name']}
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </footer>
 {block scripts}
     <script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
@@ -31,7 +51,7 @@
     })
     </script>
 
-    <script type="text/javascript">
+    {*<script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
     </script>
@@ -39,7 +59,7 @@
     try {
     var pageTracker = _gat._getTracker("UA-289403-4");
     pageTracker._trackPageview();
-    } catch(err) {}</script>
+    } catch(err) {}</script>*}
 {/block}
 
 </body></html>

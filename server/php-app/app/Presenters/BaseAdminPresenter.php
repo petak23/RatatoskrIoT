@@ -4,14 +4,32 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
+use App\Model;
 use Nette;
 use Tracy\Debugger;
 use App\Services\Logger;
 use Nette\Application\UI\Form;
 
+/**
+ * @change 01.06.2021
+ * @author petrbrouzda, petak23
+ */
 class BaseAdminPresenter extends BasePresenter
 {
     use Nette\SmartObject;
+
+    /** @var Model\RaUsers @inject */
+	public $raUsers;
+
+    /** @var Nette\Database\Table\ActiveRow|null */
+    protected $userInfo = null;
+
+    protected function startup() {
+			parent::startup();
+			if ($this->user->isLoggedIn()) {
+				$this->userInfo = $this->raUsers->getUser($this->user->id);
+			}
+    }
 
     public function checkAcces( $deviceUserId, $type="zařízení" )
     {
@@ -35,6 +53,10 @@ class BaseAdminPresenter extends BasePresenter
         $this->template->path = "";
 
         $this->populateMenu( $activeItem, $submenuAfterItem, $submenu );
+    }
+
+    public function beforeRender() {
+      $this->template->userInfo = $this->userInfo;
     }
 
 

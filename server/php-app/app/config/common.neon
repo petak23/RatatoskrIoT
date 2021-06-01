@@ -25,6 +25,9 @@ services:
 	router: App\Router\RouterFactory::createRouter
 	authenticator: App\Services\RaAuthenticator
 
+	- App\Model\RaUsers
+	- App\Model\Units
+
 forms:
 	messages:
 		EQUAL: 'Zadejte %s.'
