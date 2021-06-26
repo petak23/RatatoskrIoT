@@ -4,34 +4,23 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
-use App\Model;
 use Nette;
-use Tracy\Debugger;
+//use Tracy\Debugger;
+use App\Model;
 use App\Services\Logger;
 use Nette\Application\UI\Form;
 
 /**
- * @change 01.06.2021
- * @author petrbrouzda, petak23
+ * @last_edited petak23<petak23@gmail.com> 23.06.2021
  */
 class BaseAdminPresenter extends BasePresenter
 {
     use Nette\SmartObject;
 
-    /** @var Model\RaUsers @inject */
-	public $raUsers;
+    /** @var Model\PV_User @inject */
+	public $userInfo;
 
-    /** @var Nette\Database\Table\ActiveRow|null */
-    protected $userInfo = null;
-
-    protected function startup() {
-			parent::startup();
-			if ($this->user->isLoggedIn()) {
-				$this->userInfo = $this->raUsers->getUser($this->user->id);
-			}
-    }
-
-    public function checkAcces( $deviceUserId, $type="zařízení" )
+    public function checkAcces(int $deviceUserId, string $type="zařízení" )
     {
         if( $this->getUser()->id != $deviceUserId ) {
             Logger::log( 'audit', Logger::ERROR , 
@@ -55,15 +44,19 @@ class BaseAdminPresenter extends BasePresenter
         $this->populateMenu( $activeItem, $submenuAfterItem, $submenu );
     }
 
-    public function beforeRender() {
-      $this->template->userInfo = $this->userInfo;
+    public function beforeRender()
+    {
+        $user = $this->getUser();
+        if ($user->isLoggedIn()) {
+            $this->template->userInfo = $this->userInfo->getUser($user->id);
+        }
     }
 
 
     /**
      * Uprava formulare pro Boostrap4
      */
-    public function makeBootstrap4(Form $form): void
+    public function makeBootstrap4(Form $form): Form
     {
         $renderer = $form->getRenderer();
         $renderer->wrappers['controls']['container'] = null;
@@ -80,7 +73,7 @@ class BaseAdminPresenter extends BasePresenter
 
         foreach ($form->getControls() as $control) {
             $type = $control->getOption('type');
-            if ($type === 'button') {
+            if ($type === 'button' && !(isset($control->getControlPrototype()->attrs['class']) && strlen($control->getControlPrototype()->attrs['class']))) {
                 $control->getControlPrototype()->addClass(empty($usedPrimary) ? 'btn btn-primary' : 'btn btn-secondary');
                 $usedPrimary = true;
 
@@ -100,8 +93,6 @@ class BaseAdminPresenter extends BasePresenter
                 $control->getSeparatorPrototype()->setName('div')->addClass('form-check');
             }
         }
+        return $form;
     }
-
-
-
 }

@@ -5,289 +5,224 @@ declare(strict_types=1);
 namespace App\Presenters;
 
 use Nette;
-use Tracy\Debugger;
-use Nette\Utils\Random;
-use Nette\Utils\DateTime;
-use Nette\Utils\Arrays;
-use Nette\Utils\Html;
-use Nette\Utils\Strings;
-use Nette\Application\UI;
+
 use Nette\Application\UI\Form;
 
-use App\Services\Logger;
-use \App\Services\InventoryDataSource;
-use \App\Services\Config;
+use App\Forms;
+use App\Model;
 
+use App\Services\Logger;
+
+
+/**
+ * @last_edited petak23<petak23@gmail.com> 23.06.2021
+ */
 final class UserPresenter extends BaseAdminPresenter
 {
-    use Nette\SmartObject;
+  use Nette\SmartObject;
 
-    /** @var \App\Services\InventoryDataSource */
-    private $datasource;
+	// Database tables	
+  /** @var Model\PV_Devices @inject */
+	public $devices;
 
-    /** @var \App\Services\Config */
-    private $config;
+  /** @var Model\PV_User_state @inject */
+	public $user_state;
 
-    /** @var Nette\Security\Passwords */
-    private $passwords;
-
-    public function __construct(\App\Services\InventoryDataSource $datasource, 
-                                \App\Services\Config $config )
-    {
-        $this->datasource = $datasource;
-        $this->config = $config;
-        $this->links = $config->links;
-        $this->appName = $config->appName;
-    }
-
-    public function injectPasswords( Nette\Security\Passwords $passwords )
-    {
-        $this->passwords = $passwords;
-    }
+	// Forms
+	/** @var Forms\User\EditUserFormFactory @inject*/
+	public $editUserForm;
 
 
-    /*
-    id	username	phash	role	email	prefix	state_id	bad_pwds_count	locked_out_until	
-    measures_retention	sumdata_retention	blob_retention	self_enroll	self_enroll_code	self_enroll_error_count
-        cur_login_time	cur_login_ip	cur_login_browser	prev_login_time	prev_login_ip	prev_login_browser
-        	last_error_time	last_error_ip	last_error_browser	monitoring_token	desc
-    */
-    public function renderList(): void
-    {
-        $this->checkUserRole( 'admin' );
-        $this->populateTemplate( 6 );
-        $this->template->appName = $this->appName;
-        $this->template->links = $this->links;
-        $this->template->path = '';
-        $this->template->users = $this->datasource->getUsers();
-    }
+	/** @var \App\Services\InventoryDataSource */
+	private $datasource;
 
-    public function renderShow( $id ): void
-    {
-        $this->checkUserRole( 'admin' );
-        $this->populateTemplate( 6 );
-        $this->template->appName = $this->appName;
-        $this->template->links = $this->links;
-        $this->template->path = '../';
-        $this->template->userData = $this->datasource->getUser( $id );
-        $this->template->devices = $this->datasource->getDevicesUser( $id );
-    }
+	/** @var \App\Services\Config */
+	private $config;
 
+	/** @var Nette\Security\Passwords */
+	private $passwords;
 
-    public function renderCreate()
-    {
-        $this->checkUserRole( 'admin' );
-        $this->populateTemplate( 6 );
-        $this->template->appName = $this->appName;
-        $this->template->links = $this->links;
-        $this->template->path = '';
-    }
+	
+	public function __construct($parameters, \App\Services\InventoryDataSource $datasource, Nette\Security\Passwords $passwords )
+	{
+		$this->datasource = $datasource;
+		$this->links = $parameters['links'];
+		$this->appName = $parameters['title'];
+		$this->passwords = $passwords;
+	}
 
-    public function actionEdit(int $id): void
-    {
-        $this->checkUserRole( 'admin' );
-        $this->populateTemplate( 6 );
-        $this->template->appName = $this->appName;
-        $this->template->links = $this->links;
-        $this->template->path = '../';
-        $this->template->id = $id;
+	/*
+	id	username	phash	role	email	prefix	id_user_state	bad_pwds_count	locked_out_until	
+	measures_retention	sumdata_retention	blob_retention	self_enroll	self_enroll_code	self_enroll_error_count
+			cur_login_time	cur_login_ip	cur_login_browser	prev_login_time	prev_login_ip	prev_login_browser
+				last_error_time	last_error_ip	last_error_browser	monitoring_token	desc
+	*/
+	public function renderList(): void
+	{
+			$this->checkUserRole( 'admin' );
+			$this->populateTemplate( 6 );
+			$this->template->users = $this->userInfo->getUsers();
+	}
 
-        $post = $this->datasource->getUser( $id );
-        if (!$post) {
-            Logger::log( 'audit', Logger::ERROR ,
-                "Uzivatel {$id} nenalezen" );
-            $this->error('Uživatel nenalezen');
-        }
-        $post = $post->toArray();
-        $post['role_admin'] = strpos($post['role'], 'admin')!== false;
-        $post['role_user'] = strpos($post['role'], 'user')!== false;
-        $this->template->name = $post['username'];
-
-        $this['userForm']->setDefaults($post);
-    }
+	public function renderShow( $id ): void
+	{
+			$this->checkUserRole( 'admin' );
+			$this->populateTemplate( 6 );
+			$this->template->userData = $this->userInfo->getUser( $id ); 
+			$this->template->devices = $this->devices->getDevicesUser( $id ); 
+	}
 
 
-    protected function createComponentUserForm(): Form
-    {
-        $form = new Form;
-        $form->addProtection();
+	public function renderCreate()
+	{
+			$this->checkUserRole( 'admin' );
+			$this->populateTemplate( 6 );
+	}
 
-        $form->addText('username', 'Login name:')
-            ->setRequired()
-            ->setAttribute('size', 50)
-            ;
+	public function actionEdit(int $id): void
+	{
+			$this->checkUserRole( 'admin' );
+			$this->populateTemplate( 6 );
+			$this->template->id = $id;
 
-        $form->addText('prefix', 'Prefix:')
-            ->setRequired()
-            ->setAttribute('size', 50)
-            ;
+			$post = $this->userInfo->getUser( $id );
+			if (!$post) {
+					Logger::log( 'audit', Logger::ERROR ,
+							"Uzivatel {$id} nenalezen" );
+					$this->error('Uživatel nenalezen');
+			}
+			$post = $post->toArray();
+			$post['role_admin'] = strpos($post['role'], 'admin')!== false;
+			$post['role_user'] = strpos($post['role'], 'user')!== false;
+			$this->template->name = $post['username'];
 
-        $form->addText('password', 'Heslo:')
-            ->setOption('description', 'Pokud je vyplněno, bude nastaveno jako nové heslo; pokud se nechá prázdné, heslo se nemění.'  )
-            ->setAttribute('size', 50);
+			$this['userForm']->setDefaults($post);
+	}
 
-        $form->addText('email', 'E-mail:')
-            ->setOption('description', 'Adresa pro mailové notifikace.'  )
-            ->setAttribute('size', 50);
+	/**
+   * Edit user form component factory. Tovarnicka na formular pre editaciu užívateľa.
+   */
+	protected function createComponentUserForm(): Form {
+		$form = $this->editUserForm->create(/*$this->nastavenie['user_view_fields']*/);
+    $form['send']->onClick[] = function ($button) { 
+			$this->userFormSucceeded($button);
+      //$this->flashOut(!count($button->getForm()->errors), 'User:', 'Údaje boli uložené!', 'Došlo k chybe a údaje sa neuložili. Skúste neskôr znovu...');
+		};
+    $form['cancel']->onClick[] = function () {
+			$this->redirect('User:show', ['id'=> $this->template->id]);
+		};
+		return $this->makeBootstrap4( $form );
+	}
 
-        $states = [
-            '1' => 'čeká na zadání kódu z e-mailu',
-            '10' => 'aktivní',
-            '90' => 'zakázán administrátorem',
-            '91' => 'dočasně uzamčen',
-        ];
+	public function userFormSucceeded(Nette\Forms\Controls\SubmitButton $button): void
+	{
+		$this->checkUserRole( 'admin' );
 
-        $form->addSelect('state_id', 'Stav účtu:', $states)
-            ->setDefaultValue('10')
-            ->setPrompt('- Zvolte stav -')
-            ->setRequired();
+		$values = $button->getForm()->getValues(TRUE); 	//Nacitanie hodnot formulara
+	
+		$id = $values['id'];
+		$roles = [];
+		if( $values['role_admin']==1 ) {
+				$roles[] = "admin";
+		}
+		if( $values['role_user']==1 ) {
+				$roles[] = "user";
+		}
+		$values['role'] = implode ( ',', $roles );
 
-        $form->addCheckbox('role_admin', 'Administrátor')
-            ->setOption('description', 'Má právo spravovat uživatele.'  );
-            
-        $form->addCheckbox('role_user', 'Uživatel');
+		if( strlen($values['password']) )  {
+				$values['phash'] = $this->passwords->hash($values['password']);
+		}
+		unset($values['id'], $values['password'], $values['role_user'], $values['role_admin']);
+		
+		if( $id ) {
+				// editace
+				$user = $this->userInfo->getUser( $id );
+				if (!$user) {
+					Logger::log( 'audit', Logger::ERROR, "Uzivatel {$id} nenalezen" );
+					$this->error('Uživatel nenalezen');
+				}
+				$user->update( $values );
+		} else {
+				// zalozeni
+				$this->userInfo->createUser( $values );
+		}
 
-        $form->addText('measures_retention', 'Retence - přímá data:')
-            ->setDefaultValue('60')
-            ->setOption('description', 'Ve dnech. 0 = neomezeno.'  )
-            ->addRule(Form::INTEGER, 'Musí být číslo')
-            ->setRequired()
-            ->setAttribute('size', 50);
-
-        $form->addText('sumdata_retention', 'Retence - sumární data:')
-            ->setDefaultValue('366')
-            ->setOption('description', 'Ve dnech. 0 = neomezeno.'  )
-            ->addRule(Form::INTEGER, 'Musí být číslo')
-            ->setRequired()
-            ->setAttribute('size', 50);
-
-        $form->addText('blob_retention', 'Retence - soubory:')
-            ->setDefaultValue('8')
-            ->setOption('description', 'Ve dnech. 0 = neomezeno.'  )
-            ->addRule(Form::INTEGER, 'Musí být číslo')
-            ->setRequired()
-            ->setAttribute('size', 50);
-
-        $form->addSubmit('send', 'Uložit')
-            ->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
-            
-        $form->onSuccess[] = [$this, 'userFormSucceeded'];
-
-        $this->makeBootstrap4( $form );
-        return $form;
-    }
-
-
-    public function userFormSucceeded(Form $form, array $values): void
-    {
-        $this->checkUserRole( 'admin' );
-
-        $roles = array();
-        if( $values['role_admin']==1 ) {
-            $roles[] = "admin";
-        }
-        if( $values['role_user']==1 ) {
-            $roles[] = "user";
-        }
-        $values['role'] = implode ( ',', $roles );
-
-        if( strlen($values['password']) )  {
-            $values['phash'] = $this->passwords->hash($values['password']);
-        }
-        unset($values['password']);
-        unset($values['role_user']);
-        unset($values['role_admin']);
-
-        $id = $this->getParameter('id');
-        if( $id ) {
-            // editace
-            $user = $this->datasource->getUser( $id );
-            if (!$user) {
-                Logger::log( 'audit', Logger::ERROR ,
-                    "Uzivatel {$id} nenalezen" );
-                $this->error('Uživatel nenalezen');
-            }
-            $user->update( $values );
-        } else {
-            // zalozeni
-            $this->datasource->createUser( $values );
-        }
-
-        $this->flashMessage("Změny provedeny.", 'success');
-        if( $id ) {
-            $this->redirect("User:show", $id );
-        } else {
-            $this->redirect("User:list" );
-        }
-    }
+		$this->flashMessage("Změny provedeny.", 'success');
+		if( $id ) {
+				$this->redirect("User:show", $id );
+		} else {
+				$this->redirect("User:list" );
+		}
+	}
 
 
+	/** @todo na konci  */
+	public function actionDelete( int $id ): void
+	{
+		$this->checkUserRole( 'admin' );
+		$this->populateTemplate( 6 );
+		$this->template->appName = $this->appName;
+		$this->template->links = $this->links;
+		$this->template->path = '../';
+		$this->template->id = $id;
 
-    public function actionDelete( int $id ): void
-    {
-        $this->checkUserRole( 'admin' );
-        $this->populateTemplate( 6 );
-        $this->template->appName = $this->appName;
-        $this->template->links = $this->links;
-        $this->template->path = '../';
-        $this->template->id = $id;
+		$user = $this->userInfo->getUser( $id );
+		if (!$user) {
+			Logger::log( 'audit', Logger::ERROR , "Uzivatel {$id} nenalezen" );
+			$this->error('Uživatel nenalezen');
+		}
 
-        $post = $this->datasource->getUser( $id );
-        if (!$post) {
-            Logger::log( 'audit', Logger::ERROR ,
-                "Uzivatel {$id} nenalezen" );
-            $this->error('Uživatel nenalezen');
-        }
-
-        $this->template->userData = $post;
-        $this->template->devices = $this->datasource->getDevicesUser( $id );
-        
-    }
+		$this->template->userData = $user;
+		/** @todo zmeň datasource na userInfo */
+		$this->template->devices = $this->datasource->getDevicesUser( $id );
+	}
 
     protected function createComponentDeleteForm(): Form
     {
-        $form = new Form;
-        $form->addProtection();
+			$form = new Form;
+			$form->addProtection();
 
-        $form->addCheckbox('potvrdit', 'Potvrdit smazání')
-            ->setOption('description', 'Zaškrtnutím potvrďte, že skutečně chcete smazat uživatele a všechna jeho zařízení, data a grafy.'  )
-            ->setRequired();
+			$form->addCheckbox('potvrdit', 'Potvrdit smazání')
+					->setOption('description', 'Zaškrtnutím potvrďte, že skutečně chcete smazat uživatele a všechna jeho zařízení, data a grafy.'  )
+					->setRequired();
 
-        $form->addSubmit('delete', 'Smazat')
-            ->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
+			$form->addSubmit('delete', 'Smazat')
+					->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
 
-        $form->onSuccess[] = [$this, 'deleteFormSucceeded'];
+			$form->onSuccess[] = [$this, 'deleteFormSucceeded'];
 
-        $this->makeBootstrap4( $form );
-        return $form;
+			$this->makeBootstrap4( $form );
+			return $form;
     }
 
+		/** @todo zmeň datasource na userInfo */
     public function deleteFormSucceeded(Form $form, array $values): void
     {
-        $this->checkUserRole( 'admin' );
-        $id = $this->getParameter('id');
+			$this->checkUserRole( 'admin' );
+			$id = $this->getParameter('id');
 
-        if( $id ) {
-            // overeni prav
-            $post = $this->datasource->getUser( $id );
-            if (!$post) {
-                Logger::log( 'audit', Logger::ERROR ,
-                    "Uzivatel {$id} nenalezen" );
-                $this->error('Uživatel nenalezen');
-            }
-            Logger::log( 'audit', Logger::INFO , "[{$this->getHttpRequest()->getRemoteAddress()}, {$this->getUser()->getIdentity()->username}] Mazu uzivatele {$id}" ); 
+			if( $id ) {
+				// overeni prav
+				$post = $this->userInfo->getUser( $id );
+				if (!$post) {
+						Logger::log( 'audit', Logger::ERROR ,
+								"Uzivatel {$id} nenalezen" );
+						$this->error('Uživatel nenalezen');
+				}
+				Logger::log( 'audit', Logger::INFO , "[{$this->getHttpRequest()->getRemoteAddress()}, {$this->getUser()->getIdentity()->username}] Mazu uzivatele {$id}" ); 
 
-            $this->datasource->deleteViewsForUser( $id );            
-            $devices = $this->datasource->getDevicesUser( $id );
-            foreach( $devices->devices as $device ) {
-                
-                $this->datasource->deleteDevice( $device->attrs['id'] );
-            }
-            $this->datasource->deleteUser( $id );
-        } 
+				$this->datasource->deleteViewsForUser( $id );            
+				$devices = $this->datasource->getDevicesUser( $id );
+				foreach( $devices->devices as $device ) {
+						
+						$this->datasource->deleteDevice( $device->attrs['id'] );
+				}
+				$this->datasource->deleteUser( $id );
+			} 
 
-        $this->flashMessage("Uživatel smazán.", 'success');
-        $this->redirect('User:list' );
+			$this->flashMessage("Uživatel smazán.", 'success');
+			$this->redirect('User:list' );
     }
 
    

@@ -1,0 +1,12 @@
+services:
+
+	# Presenters
+	- App\Presenters\UserPresenter(%parameters%)
+
+  # Models
+	- App\Model\PV_Devices
+	- App\Model\PV_User
+	- App\Model\PV_User_state	
+
+  # Forms
+	- App\Forms\User\EditUserFormFactory

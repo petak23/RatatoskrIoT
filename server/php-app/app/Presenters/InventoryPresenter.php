@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
-use App\Model;
 use Nette;
 use Tracy\Debugger;
 use Nette\Utils\DateTime;
@@ -18,10 +17,6 @@ use Nette\Security\Passwords;
 
 use \App\Services\InventoryDataSource;
 
-/**
- * @change 01.06.2021
- * @author petrbrouzda, petak23
- */
 final class InventoryPresenter extends BaseAdminPresenter
 {
     use Nette\SmartObject;
@@ -35,16 +30,12 @@ final class InventoryPresenter extends BaseAdminPresenter
     /** @var Nette\Security\Passwords */
     private $passwords;
 
-    /** @var Model\Units @inject */
-	public $units;
-
     public function __construct( InventoryDataSource $datasource,
                                 \App\Services\Config $config )
     {
         $this->datasource = $datasource;
         $this->links = $config->links;
         $this->appName = $config->appName;
-        $this->absoluteUrls = true; // Generovanie linkov aj s http(s)://...
     }
 
     public function injectPasswords( Nette\Security\Passwords $passwords )
@@ -67,7 +58,7 @@ final class InventoryPresenter extends BaseAdminPresenter
     {
         $this->checkUserRole( 'user' );
         $this->populateTemplate( 5 );
-        $this->template->units = $this->units->getUnits();
+        $this->template->units = $this->datasource->getUnits();
     }
 
 
@@ -76,7 +67,7 @@ final class InventoryPresenter extends BaseAdminPresenter
     {
         $this->checkUserRole( 'user' );
         $this->populateTemplate( 3 );
-        $this->template->userData = $this->userInfo;//$this->datasource->getUser( $this->getUser()->id );
+        $this->template->userData = $this->datasource->getUser( $this->getUser()->id );
 
         if( $this->template->userData['prev_login_ip']!=NULL ) {
             $this->template->prev_login_name = gethostbyaddr( $this->template->userData['prev_login_ip'] );
@@ -91,8 +82,11 @@ final class InventoryPresenter extends BaseAdminPresenter
             }
         }
 
-        $this->template->monitoringUrl = $this->link('Monitor:show', ['token'=>$this->template->userData['monitoring_token'], 'id'=>$this->getUser()->id]);
+
+        $url = new Url( $this->getHttpRequest()->getUrl()->getBaseUrl() );
+        $this->template->monitoringUrl = $url->getAbsoluteUrl() . "monitor/show/{$this->template->userData['monitoring_token']}/{$this->getUser()->id}/";
     }
+   
 
     protected function createComponentUserForm(): Form
     {
@@ -131,7 +125,7 @@ final class InventoryPresenter extends BaseAdminPresenter
         $this->checkUserRole( 'user' );
         $this->populateTemplate( 3 );
 
-        $post = $this->userInfo;//$this->datasource->getUser( $this->getUser()->id );
+        $post = $this->datasource->getUser( $this->getUser()->id );
         if (!$post) {
             $this->error('Uživatel nebyl nalezen');
         }
@@ -171,7 +165,7 @@ final class InventoryPresenter extends BaseAdminPresenter
     
     public function passwordFormSucceeded(Form $form, array $values): void
     {
-        $post = $this->userInfo;//$this->datasource->getUser( $this->getUser()->id );
+        $post = $this->datasource->getUser( $this->getUser()->id );
         if (!$post) {
             $this->error('Uživatel nebyl nalezen');
         }

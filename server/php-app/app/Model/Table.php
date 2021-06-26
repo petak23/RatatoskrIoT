@@ -3,19 +3,20 @@ namespace App\Model;
 
 use Nette;
 use Nette\Database\Table\ActiveRow;
+use Nette\Database\Table\Selection;
 use Nette\Utils\Strings;
 
 
 /**
  * Reprezentuje repozitar pre databázovu tabulku
  * 
- * Posledna zmena(last change): 31.05.2021
+ * Posledna zmena(last change): 23.06.2021
  * 
  * @author Ing. Peter VOJTECH ml <petak23@gmail.com>
  * @copyright  Copyright (c) 2012 - 2021 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.0
+ * @version 1.0.1
  *
  */
 abstract class Table {
@@ -44,8 +45,8 @@ abstract class Table {
   
   /** 
    * Vracia celu tabulku z DB
-   * @return Nette\Database\Table\Selection */
-  protected function getTable() {
+   * @return Selection */
+  protected function getTable(): Selection {
       return $this->connection->table($this->tableName);
   }
 
@@ -76,16 +77,16 @@ abstract class Table {
   
   /** 
    * Vracia vsetky zaznamy z DB
-   * @return Nette\Database\Table\Selection */
-  public function findAll() {
+   * @return Selection */
+  public function findAll(): Selection {
     return $this->getTable();
   }
 
   /** 
    * Vracia vyfiltrovane zaznamy na zaklade vstupneho pola
    * @param string|string[] $by 
-   * @return Nette\Database\Table\Selection */
-  public function findBy($by) {
+   * @return Selection */
+  public function findBy($by): Selection {
     return $this->getTable()->where($by);
   }
 
@@ -167,11 +168,16 @@ abstract class Table {
 
   /** 
    * Funkcia pridava alebo aktualizuje v DB podla toho, ci je zadané ID
-   * @param iterable $data
    * @param mixed $id primary key
+   * @param iterable $data
    * @return ActiveRow|int|bool */
-  public function uloz($data, $id) {
+  public function save($id, $data) {
     return (isset($id) && $id) ? $this->oprav($id, $data) : $this->pridaj($data);
+  }
+
+  /** @deprecated use function save but change order of params data, id to id, data */
+  public function uloz($data, $id) {
+    return $this->save($id, $data);
   }
   
   /**

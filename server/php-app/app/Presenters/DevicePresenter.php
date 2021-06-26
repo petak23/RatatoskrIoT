@@ -266,9 +266,9 @@ final class DevicePresenter extends BaseAdminPresenter
         $blobCount = $this->datasource->getBlobCount( $id );
 
         $submenu = array();
-        $submenu[] =   ['id' => '102', 'link' => "device/show/{$id}", 'name' => "· Zařízení {$post['name']}" ];
+        $submenu[] =   ['id' => '102', 'link' => "Device:show"/*"device/show/{$id}"*/, 'params' => ['id' => $id], 'name' => "· Zařízení {$post['name']}" ];
         if( $blobCount>0 ) {
-            $submenu[] =   ['id' => '103', 'link' => "device/blobs/{$id}", 'name' => "· · Soubory ({$blobCount})" ];
+            $submenu[] =   ['id' => '103', 'link' => "Device:blobs"/*"device/blobs/{$id}"*/, 'params' => ['id' => $id], 'name' => "· · Soubory ({$blobCount})" ];
         }
         $this->populateTemplate( 102, 1, $submenu );
         $this->template->path = '../';
@@ -303,6 +303,7 @@ final class DevicePresenter extends BaseAdminPresenter
 
         $url = new Url( $this->getHttpRequest()->getUrl()->getBaseUrl() );
         $this->template->jsonUrl = $url->getAbsoluteUrl() . "json/data/{$post['json_token']}/{$id}/";
+        $this->template->jsonUrl2 = $url->getAbsoluteUrl() . "json/meteo/{$post['json_token']}/{$id}/?temp=JMENO_TEMP_SENZORU&rain=JMENO_RAIN_SENZORU";
         $this->template->blobUrl = $url->getAbsoluteUrl() . "gallery/{$post['blob_token']}/{$id}/";
 
     }

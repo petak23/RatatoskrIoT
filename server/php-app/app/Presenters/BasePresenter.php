@@ -7,10 +7,7 @@ namespace App\Presenters;
 use Nette;
 use Tracy\Debugger;
 use App\Services\Logger;
-/**
- * @change 01.06.2021
- * @author petrbrouzda, petak23
- */
+
 class BasePresenter extends Nette\Application\UI\Presenter
 {
     use Nette\SmartObject;
@@ -61,22 +58,22 @@ class BasePresenter extends Nette\Application\UI\Presenter
 
     public function populateMenu( $activeItem, $submenuAfterItem = FALSE, $submenu = NULL )
     {
-        $this->template->menu = [];
+        $this->template->menu = array();
 
-				$this->addMenuItem( ['id' => '3', 'link' => 'Inventory:user', 'name' => 'Můj účet'],
+        $this->addMenuItem( ['id' => '3', 'link' => 'inventory/user', 'name' => 'Můj účet'],
             $submenuAfterItem , $submenu );
 
         if( $this->getUser()->isInRole('admin') ) {
-            $this->addMenuItem( ['id' => '6', 'link' => 'User:list', 'name' => 'Uživatelé'],
+            $this->addMenuItem( ['id' => '6', 'link' => 'user/list', 'name' => 'Uživatelé'],
             $submenuAfterItem , $submenu );
         }
 
-        $this->addMenuItem(  ['id' => '1', 'link' => 'Inventory:home', 'name' => 'Zařízení'],
+        $this->addMenuItem(  ['id' => '1', 'link' => 'inventory/home', 'name' => 'Zařízení'],
             $submenuAfterItem , $submenu );
-        $this->addMenuItem( ['id' => '2', 'link' => 'View:views', 'name' => 'Grafy'],
+        $this->addMenuItem( ['id' => '2', 'link' => 'view/views', 'name' => 'Grafy'],
             $submenuAfterItem , $submenu );
-        $this->addMenuItem( ['id' => '5', 'link' => 'Inventory:units', 'name' => 'Kódy jednotek'],
-            $submenuAfterItem , $submenu );
+        $this->addMenuItem( ['id' => '5', 'link' => 'inventory/units', 'name' => 'Kódy jednotek'],
+            $submenuAfterItem , $submenu );  
 
         $this->template->menuId = $activeItem ;
 

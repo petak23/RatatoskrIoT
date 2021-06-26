@@ -21,6 +21,9 @@ use \App\Model\Color;
 use \App\Model\Avg;
 use \App\Services\Logger;
 
+/**
+ * @last_edited petak23<petak23@gmail.com> 23.06.2021 - function intRenderChart, render_Avgyears
+ */
 final class ChartPresenter extends BasePresenter
 {
     use Nette\SmartObject;
@@ -216,7 +219,7 @@ final class ChartPresenter extends BasePresenter
         }
 
         $sirkaXpul = intval($krokX/4);
-        if( $sirkaXpul>100 ) $sirkaXpul=100;
+        if( $sirkaXpul>30 ) $sirkaXpul=30;
         $y0 = $axisY->getPosY( 0 );
 
         foreach( $serie->points as $point ) {
@@ -763,7 +766,7 @@ final class ChartPresenter extends BasePresenter
 
         } else if( $item->source==7 ) {
             /*
-                Sumarni hodinova hodnota z denniho sumare
+                Sumarni hodinova hodnota 
             */
             $dataSeries = $this->datasource->getSensorData_minmaxavg_daysummary( $item->sensors, $startDateTime, $lenDays , 5 );
 
@@ -783,7 +786,20 @@ final class ChartPresenter extends BasePresenter
             } else {
                 $dataSeries = $this->datasource->getSensorData_minmaxavg_daysummary( $item->sensors, $startDateTime, $lenDays , 2 );
             }
-        } 
+        } else if( $item->source==10 ) {
+            /*
+            * Hodinove sumy pro kratke grafy
+            * Denni sumy pro delsi grafy 
+            */
+            if($lenDays < 7 ) {
+                $dataSeries = $this->datasource->getSensorData_minmaxavg_daysummary( $item->sensors, $startDateTime, $lenDays , 5 );
+            } else {
+                $dataSeries = $this->datasource->getSensorData_minmaxavg_daysummary( $item->sensors, $startDateTime, $lenDays , 4 );
+            }
+        } else if( $item->source==11 ) {
+            // tydenni soucty
+            $dataSeries = $this->datasource->getSensorData_weeksummary( $item->sensors, $startDateTime, $lenDays );
+        }
 
         if( $dataSeries!=NULL ) {
             // Debugger::log(  'source:'. $item->source . ' ' . $dataSeries->toString() );
@@ -813,7 +829,7 @@ final class ChartPresenter extends BasePresenter
      * 1 = jen vodorovne cary
      * 2 = sloupcovy graf
      */
-    public function intRenderChart( $id, $token, $dateFrom, $lenDays, $altYear=NULL, $mode )
+    public function intRenderChart( $id, $token, $dateFrom, $lenDays, $altYear=NULL, $mode = 0)
     {
         $view = $this->datasource->getView( $id, $token );
         
@@ -1297,7 +1313,7 @@ final class ChartPresenter extends BasePresenter
      * mode = 0 ... denni prumer
      * mode = 1 ... denni minimum
      */
-    public function render_Avgyears( $id, $token, $dateFrom, $lenDays, $altYear=NULL, $mode )
+    public function render_Avgyears( $id, $token, $dateFrom, $lenDays, $altYear=NULL, $mode = 0 )
     {
         $view = $this->datasource->getView( $id, $token );
         
