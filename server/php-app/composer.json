@@ -20,7 +20,8 @@
 		"nette/utils": "^3.0",
 		"latte/latte": "^2.5",
 		"tracy/tracy": "^2.6",
-		"mdanter/ecc": "^1.0"
+		"mdanter/ecc": "^1.0",
+		"dg/adminer-custom": "^1.28"
 	},
 	"require-dev": {
 		"nette/tester": "^2.0"
