@@ -8,6 +8,7 @@ use Nette;
 
 use Nette\Application\UI\Form;
 
+use App\Exceptions;
 use App\Forms;
 use App\Model;
 
@@ -15,7 +16,7 @@ use App\Services\Logger;
 
 
 /**
- * @last_edited petak23<petak23@gmail.com> 23.06.2021
+ * @last_edited petak23<petak23@gmail.com> 01.07.2021
  */
 final class UserPresenter extends BaseAdminPresenter
 {
@@ -103,59 +104,16 @@ final class UserPresenter extends BaseAdminPresenter
    * Edit user form component factory. Tovarnicka na formular pre editaciu užívateľa.
    */
 	protected function createComponentUserForm(): Form {
-		$form = $this->editUserForm->create(/*$this->nastavenie['user_view_fields']*/);
-    $form['send']->onClick[] = function ($button) { 
-			$this->userFormSucceeded($button);
-      //$this->flashOut(!count($button->getForm()->errors), 'User:', 'Údaje boli uložené!', 'Došlo k chybe a údaje sa neuložili. Skúste neskôr znovu...');
+		$form = $this->editUserForm->create($this->getHttpRequest()->getRemoteAddress());
+		$form['send']->onClick[] = function ($button) { 
+			$id = $button->getForm()->getValues()->id;
+			$this->flashOut(!count($button->getForm()->errors), $id ? ['User:show', $id] : "User:list", 'Údaje boli uložené!', 'Došlo k chybe a údaje sa neuložili. Skúste neskôr znovu...');
 		};
     $form['cancel']->onClick[] = function () {
 			$this->redirect('User:show', ['id'=> $this->template->id]);
 		};
 		return $this->makeBootstrap4( $form );
 	}
-
-	public function userFormSucceeded(Nette\Forms\Controls\SubmitButton $button): void
-	{
-		$this->checkUserRole( 'admin' );
-
-		$values = $button->getForm()->getValues(TRUE); 	//Nacitanie hodnot formulara
-	
-		$id = $values['id'];
-		$roles = [];
-		if( $values['role_admin']==1 ) {
-				$roles[] = "admin";
-		}
-		if( $values['role_user']==1 ) {
-				$roles[] = "user";
-		}
-		$values['role'] = implode ( ',', $roles );
-
-		if( strlen($values['password']) )  {
-				$values['phash'] = $this->passwords->hash($values['password']);
-		}
-		unset($values['id'], $values['password'], $values['role_user'], $values['role_admin']);
-		
-		if( $id ) {
-				// editace
-				$user = $this->userInfo->getUser( $id );
-				if (!$user) {
-					Logger::log( 'audit', Logger::ERROR, "Uzivatel {$id} nenalezen" );
-					$this->error('Uživatel nenalezen');
-				}
-				$user->update( $values );
-		} else {
-				// zalozeni
-				$this->userInfo->createUser( $values );
-		}
-
-		$this->flashMessage("Změny provedeny.", 'success');
-		if( $id ) {
-				$this->redirect("User:show", $id );
-		} else {
-				$this->redirect("User:list" );
-		}
-	}
-
 
 	/** @todo na konci  */
 	public function actionDelete( int $id ): void

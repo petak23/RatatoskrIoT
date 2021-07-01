@@ -8,6 +8,9 @@ use Nette;
 use Nette\Application\UI\Form;
 use App\Services\Logger;
 
+/**
+ * @last_edited petak23<petak23@gmail.com> 29.06.2021 - sign out
+ */
 class SignPresenter extends Nette\Application\UI\Presenter
 {
     /** @persistent */
@@ -86,7 +89,7 @@ class SignPresenter extends Nette\Application\UI\Presenter
                 "[{$this->getHttpRequest()->getRemoteAddress()}] Logout: odhlasen {$this->getUser()->getIdentity()->username}" ); 
 
         }
-        $this->getUser()->logout();
+        $this->getUser()->logout(true); // Vymaže aj identitu
         $this->flashMessage('Odhlášení bylo úspěšné.');
         $this->redirect('Sign:in');
     }

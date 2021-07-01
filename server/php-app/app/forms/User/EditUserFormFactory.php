@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Forms\User;
 
+use App\Exceptions;
 use App\Model;
+use App\Services\Logger;
 use Nette\Application\UI\Form;
-use Nette\Security\User;
+use Nette\Security;
 
 /**
  * Tovarnicka pre formular na pridanie a editaciu užívateľa
- * Posledna zmena 23.06.2021
+ * Posledna zmena 01.07.2021
  * 
  * @author     Ing. Peter VOJTECH ml. <petak23@gmail.com>
  * @copyright  Copyright (c) 2012 - 2021 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version    1.0.0
+ * @version    1.0.1
  */
 class EditUserFormFactory {
   /** @var Model\PV_User */
@@ -24,22 +26,37 @@ class EditUserFormFactory {
   /** @var array */
   private $user_state;
 
+  /** @var Security\Passwords */
+	private $passwords;
+  /** @var Security\User */
+	private $user;
+
   /** @var array */
-	//private $urovneReg;
+	private $urovneReg;
+
+  private $remoteAddress;
+
 	
-  public function __construct(Model\PV_User $pv_user, Model\PV_User_state $user_state, User $user) {
+  public function __construct(Model\PV_User $pv_user,
+                              Model\PV_User_roles $pv_user_roles,
+                              Model\PV_User_state $user_state,
+                              Security\User $user, Security\Passwords $passwords) {
 		$this->pv_user = $pv_user;
     $this->user_state = $user_state->getAllForForm();
-    //$this->urovneReg = $user_roles->urovneReg(($user->isLoggedIn()) ? $user->getIdentity()->id_user_roles : 0);
+    $this->passwords = $passwords;
+    $this->urovneReg = $pv_user_roles->urovneReg(($user->isLoggedIn()) ? ($user->getIdentity()->id_user_roles != null ? $user->getIdentity()->id_user_roles : 0) : 0);
+    $this->user = $user;
 	}
   
   /**
    * Formular pre pridanie alebo editaciu kategorie
    * @return Form */
-  public function create(): Form  {
+  public function create($remoteAddress): Form  {
+    $this->remoteAddress = $remoteAddress;
+
     $form = new Form;
     $form->addProtection();
-   
+  
     $form->addHidden('id');
     
     $form->addText('username', 'Login name:')
@@ -68,6 +85,8 @@ class EditUserFormFactory {
         
     $form->addCheckbox('role_user', 'Uživatel');
 
+    $form->addSelect('id_user_roles', 'Úroveň registrácie užívateľa:', $this->urovneReg);
+
     $form->addText('measures_retention', 'Retence - přímá data:')
         ->setDefaultValue('60')
         ->setOption('description', 'Ve dnech. 0 = neomezeno.'  )
@@ -92,8 +111,7 @@ class EditUserFormFactory {
       $form->addSubmit('send', 'Uložit')
           ->setHtmlAttribute('class', 'btn btn-success')
           //->setHtmlAttribute('onclick', 'this.form.submit(); this.disabled=true; ') // if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; }return false;
-          //->onClick[] = [$this, 'userFormSucceeded']
-          ;
+          ->onClick[] = [$this, 'userFormSucceeded'];
 
       $form->addSubmit('cancel', 'Späť bez zmeny')
           ->setHtmlAttribute('class', 'btn btn-outline-secondary')
@@ -103,47 +121,45 @@ class EditUserFormFactory {
   }
 
 
-    /*public function userFormSucceeded(Form $form, array $values): void
-    {
-        $this->checkUserRole( 'admin' );
-
+    public function userFormSucceeded(\Nette\Forms\Controls\SubmitButton $button): void {
+      if ($this->user->isInRole('admin')) {
+        $values = $button->getForm()->getValues(TRUE); 	//Nacitanie hodnot formulara
+    
+        $id = $values['id'];
         $roles = [];
         if( $values['role_admin']==1 ) {
-            $roles[] = "admin";
+          $roles[] = "admin";
         }
         if( $values['role_user']==1 ) {
-            $roles[] = "user";
+          $roles[] = "user";
         }
         $values['role'] = implode ( ',', $roles );
 
         if( strlen($values['password']) )  {
-            $values['phash'] = $this->passwords->hash($values['password']);
+          $values['phash'] = $this->passwords->hash($values['password']);
         }
-        unset($values['password']);
-        unset($values['role_user']);
-        unset($values['role_admin']);
+        unset($values['id'], $values['password'], $values['role_user'], $values['role_admin']);
 
-        $id = $this->getParameter('id');
-        if( $id ) {
+        try {
+          if( $id ) {
             // editace
-            //$user = $this->datasource->getUser( $id );
-            $user = $this->userInfo->getUser( $id );
+            $user = $this->pv_user->getUser( $id );
             if (!$user) {
-                Logger::log( 'audit', Logger::ERROR ,
-                    "Uzivatel {$id} nenalezen" );
-                $this->error('Uživatel nenalezen');
+              Logger::log( 'audit', Logger::ERROR, "Uzivatel {$id} nenalezen" );
+              $button->addError('Uživatel nenalezen');
             }
             $user->update( $values );
-        } else {
+          } else {
             // zalozeni
-            $this->datasource->createUser( $values );
+            $this->pv_user->createUser( $values );
+          }
+        } catch (\Nette\Database\DriverException $e) {
+          $button->getForm()->addError($e->getMessage());
         }
-
-        $this->flashMessage("Změny provedeny.", 'success');
-        if( $id ) {
-            $this->redirect("User:show", $id );
-        } else {
-            $this->redirect("User:list" );
-        }
-    }*/
+      } else {
+        $button->getForm()->addError('Neoprávnený prístup. Editácia nemožná!');
+        Logger::log( 'audit', Logger::ERROR , 
+          "[{$this->remoteAddress}] ACCESS: Uzivatel #{$this->user->id} {$this->user->getIdentity()->username} zkusil pouzit funkci vyzadujici roli admin" ); 
+      }
+    }
 }

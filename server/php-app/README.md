@@ -47,3 +47,14 @@ Aplikace obsahuje následující kód třetích stran ve formě zdrojových kód
 - ....
 - `composer install` v tomto adresáry
 - `npm install` v tomto adresáry
+
+## Webpack
+
+- `npm run start` - generates development bundles
+- `npm run watch` - watch changes in development bundles
+- `npm run serve` - starts webpack development server
+- `npm run build` - generates production bundles
+
+## Deployment
+
+ - `php ../ftp-deployment/deployment deployment.ini`

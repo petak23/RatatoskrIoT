@@ -6,6 +6,7 @@ services:
   # Models
 	- App\Model\PV_Devices
 	- App\Model\PV_User
+	- App\Model\PV_User_roles
 	- App\Model\PV_User_state	
 
   # Forms

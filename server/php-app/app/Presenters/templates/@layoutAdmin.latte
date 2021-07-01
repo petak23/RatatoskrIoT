@@ -8,6 +8,7 @@
         <link href="{$basePath}/css/styles.css" rel="stylesheet" />
         <link href="{$basePath}/css/mystyles.css" rel="stylesheet" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" crossorigin="anonymous"></script>
+        <link rel="shortcut icon" href="{$basePath}/favicon.ico" type="image/x-icon">
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -15,17 +16,20 @@
             <a class="navbar-brand" href="#">{$appName}</a>
             <ul class="navbar-nav ml-auto mr-0 mr-md-3">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$user->getIdentity()->prefix} <i class="fas fa-user fa-fw"></i></a>
+                    <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {$userInfo->prefix} <i class="fas fa-user fa-fw"></i>
+                    </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                        <div class="dropdown-item">Uživatel: <b>{$user->getIdentity()->username}</b></div>
-                        <div class="dropdown-item"><small>
-                            Role: 
-                            {foreach $user->getIdentity()->getRoles() as $role} <b>{$role}</b>{sep}, {/sep} {/foreach}
-                            </small>
-                        </div>
-                        <div class="dropdown-item"><small>Prefix: {*$user->getIdentity()->prefix*}{$userInfo->prefix}</small></div>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" n:href="Sign:out">Odhlásit</a>
+                      <div class="dropdown-item">Uživatel: <b>{$userInfo->username}</b></div>
+                      <div class="dropdown-item">
+                        <small>
+                          Role: {foreach $user->getIdentity()->getRoles() as $role} <b>{$role}</b>{sep}, {/sep} {/foreach}
+                          <br /> Nová rola: {$userInfo->user_role->name}
+                        </small>
+                      </div>
+                      <div class="dropdown-item"><small>Prefix: {$userInfo->prefix}</small></div>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" n:href="Sign:out">Odhlásit</a>
                     </div>
                 </li>
             </ul>
@@ -87,7 +91,7 @@
                 $('[data-toggle="tooltip"]').tooltip()
             })
             </script>
-
+            {*
             <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
@@ -96,7 +100,7 @@
             try {
             var pageTracker = _gat._getTracker("UA-289403-4");
             pageTracker._trackPageview();
-            } catch(err) {}</script>
+            } catch(err) {}</script>*}
 
 		{/block}
 

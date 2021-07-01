@@ -37,8 +37,8 @@ module.exports = {
   mode: devMode ? "development" : "production",
   context: path.join(ROOT_PATH, "app/assets"),
   entry: {
-    front: [path.join(ROOT_PATH, "app/assets/front/css/main.css"), path.join(ROOT_PATH, "app/assets/front/js/main.js")],
-    admin: [path.join(ROOT_PATH, "app/assets/admin/css/main.css"), path.join(ROOT_PATH, "app/assets/admin/js/main.js")]
+    front: [path.join(ROOT_PATH, "app/assets/css/main.css"), path.join(ROOT_PATH, "app/assets/js/main.js")],
+    //admin: [path.join(ROOT_PATH, "app/assets/admin/css/main.css"), path.join(ROOT_PATH, "app/assets/admin/js/main.js")]
     //texyla: [path.join(ROOT_PATH, "www/texyla/css/main.css"), path.join(ROOT_PATH, "www/texyla/texyla-init.js")]
   },
   output: {
