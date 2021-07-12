@@ -10,7 +10,7 @@ use Nette\Utils\Strings;
 /**
  * Reprezentuje repozitar pre databázovu tabulku
  * 
- * Posledna zmena(last change): 23.06.2021
+ * Posledna zmena(last change): 06.07.2021
  * 
  * @author Ing. Peter VOJTECH ml <petak23@gmail.com>
  * @copyright  Copyright (c) 2012 - 2021 Ing. Peter VOJTECH ml.
@@ -23,7 +23,7 @@ abstract class Table {
 
   use Nette\SmartObject;
   
-  /** @var Nette\Database\Context */
+  /** @var Nette\Database\Explorer */
   protected $connection;
 
   /** @var string */
@@ -35,7 +35,7 @@ abstract class Table {
   /**
    * @param Nette\Database\Context $db
    * @throws Nette\InvalidStateException */
-  public function __construct(Nette\Database\Context $db) {
+  public function __construct(Nette\Database\Explorer $db) {
     $this->connection = $db;
     if ($this->tableName === NULL) {
       $class = get_class($this);

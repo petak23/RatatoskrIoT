@@ -85,7 +85,7 @@ class EditUserFormFactory {
         
     $form->addCheckbox('role_user', 'Uživatel');
 
-    $form->addSelect('id_user_roles', 'Úroveň registrácie užívateľa:', $this->urovneReg);
+    $form->addSelect('id_user_roles', 'Rola užívateľa:', $this->urovneReg);
 
     $form->addText('measures_retention', 'Retence - přímá data:')
         ->setDefaultValue('60')

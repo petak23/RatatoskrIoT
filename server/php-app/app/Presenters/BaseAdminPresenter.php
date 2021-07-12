@@ -11,7 +11,7 @@ use App\Services\Logger;
 use Nette\Application\UI\Form;
 
 /**
- * @last_edited petak23<petak23@gmail.com> 23.06.2021
+ * @last_edited petak23<petak23@gmail.com> 06.07.2021
  */
 class BaseAdminPresenter extends BasePresenter
 {
@@ -44,8 +44,7 @@ class BaseAdminPresenter extends BasePresenter
         $this->populateMenu( $activeItem, $submenuAfterItem, $submenu );
     }
 
-    public function beforeRender()
-    {
+    public function beforeRender() {
         $user = $this->getUser();
         if ($user->isLoggedIn()) {
             $this->template->userInfo = $this->userInfo->getUser($user->id);

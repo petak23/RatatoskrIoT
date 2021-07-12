@@ -7,6 +7,7 @@
         <title>{ifset title}{include title|stripHtml} | {/ifset}{$appName}</title>
         <link href="{$basePath}/css/styles.css" rel="stylesheet" />
         <link href="{$basePath}/css/mystyles.css" rel="stylesheet" />
+        <link href="{$basePath}/css/PV_styles.css" rel="stylesheet" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" crossorigin="anonymous"></script>
         <link rel="shortcut icon" href="{$basePath}/favicon.ico" type="image/x-icon">
     </head>
@@ -23,7 +24,7 @@
                       <div class="dropdown-item">Uživatel: <b>{$userInfo->username}</b></div>
                       <div class="dropdown-item">
                         <small>
-                          Role: {foreach $user->getIdentity()->getRoles() as $role} <b>{$role}</b>{sep}, {/sep} {/foreach}
+                          {*Role: {foreach $user->getIdentity()->getRoles() as $role} <b>{$role}</b>{sep}, {/sep} {/foreach}*}
                           <br /> Nová rola: {$userInfo->user_role->name}
                         </small>
                       </div>
@@ -40,22 +41,26 @@
                     <div class="sb-sidenav-menu">
                         <div class="nav">
                             <div class="sb-sidenav-menu-heading">Menu</div>
-							{foreach $menu as $row}
-								<a class="nav-link pt-0 pb-1 {if ($row['id']==$menuId)}active{/if}" href="{$basePath}/{$row['link']}">{$row['name']}</a>
-							{/foreach}
+                              {foreach $menu as $row}
+                                <a class="nav-link pt-0 pb-1 {if ($row['id']==$menuId)}active{/if}" href="{$basePath}/{$row['link']}">{$row['name']}</a>
+                              {/foreach}
                             <div>&nbsp;</div>
+                            
                         </div>
                     </div>
                 </nav>
+                <div class="bg-warning">
+                    {control menu templateType=>'RA_Fixed', nadpis=>'Menu new'}
+                </div>
             </div>
             <div id="layoutSidenav_content">
                 <main>
-                    <div  class="container-fluid px-0 mx-0 px-md-2 px-lg-4" {if ($isChart?)} style="max-width: {$maxW}px;" {/if} >
+                    <div class="container-fluid px-0 mx-0 px-md-2 px-lg-4" {ifset $isChart} style="max-width: {$maxW}px;" {/ifset} >
                         {foreach $flashes as $flash}
 					        <div class="alert flash alert-{$flash->type}">{$flash->message}</div>
                         {/foreach}
 
-	{include content}
+	                    {include content}
 
 					</div>
                 </main>

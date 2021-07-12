@@ -44,4 +44,12 @@ class PV_User extends \App\Model\Table {
   public function createUser( $data ) {
     return $this->save(0, $data);
   }
+
+  /** 
+   * @param int $id Id uzivatela
+   * @param string $phash Hash hesla 
+   * @return ActiveRow|int|bool */
+  public function updateUserPassword(int $id, string $phash ) {
+    return $this->save( $id, ['phash' => $phash]);
+  }
 }

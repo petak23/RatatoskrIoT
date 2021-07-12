@@ -9,9 +9,9 @@ use Nette\Application\UI\Form;
 use App\Services\Logger;
 
 /**
- * @last_edited petak23<petak23@gmail.com> 29.06.2021 - sign out
+ * @last_edited petak23<petak23@gmail.com> 06.07.2021 - sign out
  */
-class SignPresenter extends Nette\Application\UI\Presenter
+class SignPresenter extends MainBasePresenter
 {
     /** @persistent */
     public $username = '';
@@ -51,7 +51,7 @@ class SignPresenter extends Nette\Application\UI\Presenter
 			->setRequired('Prosím vyplňte své heslo.');
 
         $form->addSubmit('send', 'Přihlásit')
-            ->setAttribute('class', 'btn btn-outline-success')
+            ->setHtmlAttribute('class', 'btn btn-outline-success')
             ->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
 
         $form->onSuccess[] = [$this, 'signInFormSucceeded'];

@@ -61,3 +61,4 @@ http:
 
 includes:
   - services.neon
+  - components.neon

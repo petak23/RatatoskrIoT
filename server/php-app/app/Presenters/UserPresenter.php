@@ -8,7 +8,7 @@ use Nette;
 
 use Nette\Application\UI\Form;
 
-use App\Exceptions;
+//use App\Exceptions;
 use App\Forms;
 use App\Model;
 
@@ -16,7 +16,7 @@ use App\Services\Logger;
 
 
 /**
- * @last_edited petak23<petak23@gmail.com> 01.07.2021
+ * @last_edited petak23<petak23@gmail.com> 06.07.2021
  */
 final class UserPresenter extends BaseAdminPresenter
 {
@@ -43,7 +43,6 @@ final class UserPresenter extends BaseAdminPresenter
 	/** @var Nette\Security\Passwords */
 	private $passwords;
 
-	
 	public function __construct($parameters, \App\Services\InventoryDataSource $datasource, Nette\Security\Passwords $passwords )
 	{
 		$this->datasource = $datasource;
@@ -60,44 +59,43 @@ final class UserPresenter extends BaseAdminPresenter
 	*/
 	public function renderList(): void
 	{
-			$this->checkUserRole( 'admin' );
-			$this->populateTemplate( 6 );
-			$this->template->users = $this->userInfo->getUsers();
+		//$this->checkUserRole( 'admin' );
+		$this->populateTemplate( 6 );
+		$this->template->users = $this->userInfo->getUsers();
 	}
 
-	public function renderShow( $id ): void
+	public function renderShow(int $id ): void
 	{
-			$this->checkUserRole( 'admin' );
-			$this->populateTemplate( 6 );
-			$this->template->userData = $this->userInfo->getUser( $id ); 
-			$this->template->devices = $this->devices->getDevicesUser( $id ); 
+		//$this->checkUserRole( 'admin' );
+		$this->populateTemplate( 6 );
+		$this->template->userData = $this->userInfo->getUser( $id ); 
+		$this->template->devices = $this->devices->getDevicesUser( $id ); 
 	}
-
 
 	public function renderCreate()
 	{
-			$this->checkUserRole( 'admin' );
-			$this->populateTemplate( 6 );
+			//$this->checkUserRole( 'admin' );
+		$this->populateTemplate( 6 );
 	}
 
 	public function actionEdit(int $id): void
 	{
-			$this->checkUserRole( 'admin' );
-			$this->populateTemplate( 6 );
-			$this->template->id = $id;
+		//$this->checkUserRole( 'admin' );
+		$this->populateTemplate( 6 );
+		$this->template->id = $id;
 
-			$post = $this->userInfo->getUser( $id );
-			if (!$post) {
-					Logger::log( 'audit', Logger::ERROR ,
-							"Uzivatel {$id} nenalezen" );
-					$this->error('Uživatel nenalezen');
-			}
-			$post = $post->toArray();
-			$post['role_admin'] = strpos($post['role'], 'admin')!== false;
-			$post['role_user'] = strpos($post['role'], 'user')!== false;
-			$this->template->name = $post['username'];
+		$post = $this->userInfo->getUser( $id );
+		if (!$post) {
+				Logger::log( 'audit', Logger::ERROR ,
+						"Uzivatel {$id} nenalezen" );
+				$this->error('Uživatel nenalezen');
+		}
+		$post = $post->toArray();
+		$post['role_admin'] = strpos($post['role'], 'admin')!== false;
+		$post['role_user'] = strpos($post['role'], 'user')!== false;
+		$this->template->name = $post['username'];
 
-			$this['userForm']->setDefaults($post);
+		$this['userForm']->setDefaults($post);
 	}
 
 	/**
@@ -118,7 +116,7 @@ final class UserPresenter extends BaseAdminPresenter
 	/** @todo na konci  */
 	public function actionDelete( int $id ): void
 	{
-		$this->checkUserRole( 'admin' );
+		//$this->checkUserRole( 'admin' );
 		$this->populateTemplate( 6 );
 		$this->template->appName = $this->appName;
 		$this->template->links = $this->links;
@@ -136,55 +134,50 @@ final class UserPresenter extends BaseAdminPresenter
 		$this->template->devices = $this->datasource->getDevicesUser( $id );
 	}
 
-    protected function createComponentDeleteForm(): Form
-    {
-			$form = new Form;
-			$form->addProtection();
+	protected function createComponentDeleteForm(): Form
+	{
+		$form = new Form;
+		$form->addProtection();
 
-			$form->addCheckbox('potvrdit', 'Potvrdit smazání')
-					->setOption('description', 'Zaškrtnutím potvrďte, že skutečně chcete smazat uživatele a všechna jeho zařízení, data a grafy.'  )
-					->setRequired();
+		$form->addCheckbox('potvrdit', 'Potvrdit smazání')
+				->setOption('description', 'Zaškrtnutím potvrďte, že skutečně chcete smazat uživatele a všechna jeho zařízení, data a grafy.'  )
+				->setRequired();
 
-			$form->addSubmit('delete', 'Smazat')
-					->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
+		$form->addSubmit('delete', 'Smazat')
+				->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
 
-			$form->onSuccess[] = [$this, 'deleteFormSucceeded'];
+		$form->onSuccess[] = [$this, 'deleteFormSucceeded'];
 
-			$this->makeBootstrap4( $form );
-			return $form;
-    }
+		$this->makeBootstrap4( $form );
+		return $form;
+	}
 
-		/** @todo zmeň datasource na userInfo */
-    public function deleteFormSucceeded(Form $form, array $values): void
-    {
-			$this->checkUserRole( 'admin' );
-			$id = $this->getParameter('id');
+	/** @todo zmeň datasource na userInfo */
+	public function deleteFormSucceeded(Form $form, array $values): void
+	{
+		$this->checkUserRole( 'admin' );
+		$id = $this->getParameter('id');
 
-			if( $id ) {
-				// overeni prav
-				$post = $this->userInfo->getUser( $id );
-				if (!$post) {
-						Logger::log( 'audit', Logger::ERROR ,
-								"Uzivatel {$id} nenalezen" );
-						$this->error('Uživatel nenalezen');
-				}
-				Logger::log( 'audit', Logger::INFO , "[{$this->getHttpRequest()->getRemoteAddress()}, {$this->getUser()->getIdentity()->username}] Mazu uzivatele {$id}" ); 
+		if( $id ) {
+			// overeni prav
+			$post = $this->userInfo->getUser( $id );
+			if (!$post) {
+					Logger::log( 'audit', Logger::ERROR ,
+							"Uzivatel {$id} nenalezen" );
+					$this->error('Uživatel nenalezen');
+			}
+			Logger::log( 'audit', Logger::INFO , "[{$this->getHttpRequest()->getRemoteAddress()}, {$this->getUser()->getIdentity()->username}] Mazu uzivatele {$id}" ); 
 
-				$this->datasource->deleteViewsForUser( $id );            
-				$devices = $this->datasource->getDevicesUser( $id );
-				foreach( $devices->devices as $device ) {
-						
-						$this->datasource->deleteDevice( $device->attrs['id'] );
-				}
-				$this->datasource->deleteUser( $id );
-			} 
+			$this->datasource->deleteViewsForUser( $id );            
+			$devices = $this->datasource->getDevicesUser( $id );
+			foreach( $devices->devices as $device ) {
+					
+					$this->datasource->deleteDevice( $device->attrs['id'] );
+			}
+			$this->datasource->deleteUser( $id );
+		} 
 
-			$this->flashMessage("Uživatel smazán.", 'success');
-			$this->redirect('User:list' );
-    }
-
-   
-    
+		$this->flashMessage("Uživatel smazán.", 'success');
+		$this->redirect('User:list' );
+	}   
 }
-
-

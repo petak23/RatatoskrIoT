@@ -69,7 +69,7 @@ INSERT INTO `user_resource` (`id`, `name`) VALUES
 (5,	'Device'),
 (6,	'Enroll'),
 (7,	'Error4xx'),
-(8,	'Error')
+(8,	'Error'),
 (9,	'Gallery'),
 (10,	'Chart'),
 (11,	'Inventory'),
@@ -78,7 +78,8 @@ INSERT INTO `user_resource` (`id`, `name`) VALUES
 (14,	'Ra'),
 (15,	'Sensor'),
 (16,	'View'),
-(16,	'Vitem');
+(17,	'Vitem'),
+(18, 'UserAcl');
 
 DROP TABLE IF EXISTS `user_permission`;
 CREATE TABLE `user_permission` (
@@ -94,41 +95,41 @@ CREATE TABLE `user_permission` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Užívateľské oprávnenia';
 
 INSERT INTO `user_permission` (`id`, `id_user_roles`, `id_user_resource`, `actions`) VALUES
-(1,	0,	1,	NULL),
-(2,	0,	3,	NULL),
-(3,	0,	4,	NULL),
-(4,	0,	6,	NULL),
-(5,	0,	7,	NULL),
-(6,	0,	8,	NULL),
-(7,	0,	2,	NULL),
-(8,	0,	9,	NULL),
-(9,	0,	10,	NULL),
-(10,	0,	12,	NULL),
-(11,	0,	13,	NULL),
-(12,	0,	14,	NULL),
--- TODO
-(13,	3,	10,	NULL),
-(14,	3,	15,	NULL),
-(15,	4,	9,	NULL),
-(16,	4,	19,	'addpol'),
-(17,	4,	13,	'addpol'),
-(18,	4,	12,	'default'),
-(19,	4,	11,	'default'),
-(20,	4,	14,	'default,edit'),
-(21,	4,	18,	NULL),
-(22,	4,	17,	NULL),
-(23,	4,	20,	NULL),
-(24,	4,	16,	'default,edit'),
-(25,	5,	16,	NULL),
-(26,	5,	14,	NULL),
-(27,	5,	11,	NULL),
-(28,	5,	12,	NULL),
-(29,	5,	13,	NULL),
-(30,	5,	19,	NULL),
-(31,	3,	21,	NULL),
-(32,	1,	23,	'default,mailChange,passwordChange,activateNewEmail'),
-(33,	3,	7,	'default'),
-(34,	4,	25,	NULL);
+-- Sign
+(1,	1,	1,	NULL), 
+-- Homepage
+(2,	2,	2,	NULL),
+-- User
+(3,	6,	3,	NULL),
+-- Crontask
+(4,	1,	4,	NULL),
+-- Device
+(5,	1,	5,	'deleteupdate'),
+(6,	2,	5,	NULL),
+-- Enroll
+(7,	1,	6,	NULL),
+-- Error4xx
+(8,	1,	7,	NULL),
+-- Error
+(9,	1,	8,	NULL),
+-- Gallery
+(10,	1,	9,	NULL),
+-- Chart
+(11,	1,	10,	NULL),
+-- Inventory
+(12,	2,	11,	NULL),
+-- Json
+(13,	1,	12,	NULL),
+-- Monitor
+(14,	1,	13,	NULL),
+-- Ra
+(15,	1,	14,	NULL),
+-- Sensor
+(16,	2,	15,	NULL),
+-- View
+(17,	2,	16,	NULL),
+-- Vitem
+(18,	2,	17,	NULL);
 
 DROP TABLE IF EXISTS `user_state`;
 CREATE TABLE `user_state` (

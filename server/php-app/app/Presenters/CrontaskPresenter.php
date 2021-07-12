@@ -13,7 +13,7 @@ use Nette\Utils\Image;
 
 use App\Services\Logger;
 
-final class CrontaskPresenter extends Nette\Application\UI\Presenter
+final class CrontaskPresenter extends MainBasePresenter
 {
     use Nette\SmartObject;
 

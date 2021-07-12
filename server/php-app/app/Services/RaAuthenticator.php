@@ -106,7 +106,8 @@ class RaAuthenticator implements Security\IAuthenticator {
     
     Logger::log( self::NAME, Logger::INFO , "[{$ip}] Login: prihlasen {$username} v roli '{$userData->role}', '{$ua}'" ); 
 
-    $roles = Strings::split($userData->role, '~,\s*~');
-		return new Security\SimpleIdentity($userData->id, $roles, ['username' => $userData->username, 'prefix' => $userData->prefix, 'id_user_roles' => $userData->id_user_roles ]);
+    //$roles = Strings::split($userData->role, '~,\s*~');
+    $role = $userData->user_roles->role;
+		return new Security\SimpleIdentity($userData->id, $role, ['username' => $userData->username, 'prefix' => $userData->prefix, 'id_user_roles' => $userData->id_user_roles ]);
 	}
 }

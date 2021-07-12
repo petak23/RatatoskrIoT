@@ -15,7 +15,7 @@ namespace App\Model;
  * @link       http://petak23.echo-msz.eu
  * @version    1.0.0
  */
-class PV_User_roles extends \App\Model\Table {
+class PV_User_roles extends Table {
   /** @var string */
   protected $tableName = 'user_roles';
 

@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
+use App\Components\Menu;
+use App\Model;
 use Nette;
 use Tracy\Debugger;
 use App\Services\Logger;
 
 /**
- * @last_edited petak23<petak23@gmail.com> 28.06.2021
+ * @last_edited petak23<petak23@gmail.com> 12.07.2021
  */
-class BasePresenter extends Nette\Application\UI\Presenter
+class BasePresenter extends MainBasePresenter
 {
   use Nette\SmartObject;
 
+  /** @var Model\PV_Main_menu @inject */
+	public $main_menu;
+
   public function checkUserRole( $reqRole ) {
-    if( !$this->getUser()->loggedIn ) {
+    /*if( !$this->getUser()->loggedIn ) {
         Logger::log( 'webapp', Logger::ERROR , 
             "[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel je neprihlaseny, jdeme na login." ); 
 
@@ -29,7 +34,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
       $response = $this->getHttpResponse();
       $response->setHeader('Cache-Control', 'no-cache');
       $response->setExpiration('1 sec'); 
-
+ 
       // https://pla.nette.org/cs/jak-po-odeslani-formulare-zobrazit-stejnou-stranku
       $this->redirect('Sign:in', ['backlink' => $this->storeRequest()] );
     }
@@ -42,10 +47,10 @@ class BasePresenter extends Nette\Application\UI\Presenter
       $response->setHeader('Cache-Control', 'no-cache');
       $response->setExpiration('1 sec'); 
   
-      $this->getUser()->logout();
+      $this->getUser()->logout(true);
       $this->flashMessage('Vaše úroveň oprávnění nestačí k použití této funkce!');
       $this->redirect('Sign:in');
-    }
+    }*/
   }
 
   private function addMenuItem( $vals, $submenuAfterItem = FALSE, $submenu = NULL )
@@ -65,17 +70,20 @@ class BasePresenter extends Nette\Application\UI\Presenter
     $this->addMenuItem( ['id' => '3', 'link' => 'inventory/user', 'name' => 'Můj účet'],
         $submenuAfterItem , $submenu );
 
-    if( $this->getUser()->isInRole('admin') ) {
-      $this->addMenuItem( ['id' => '6', 'link' => 'user/list', 'name' => 'Uživatelé'],
-      $submenuAfterItem , $submenu );
-    }
-
     $this->addMenuItem(  ['id' => '1', 'link' => 'inventory/home', 'name' => 'Zařízení'],
         $submenuAfterItem , $submenu );
     $this->addMenuItem( ['id' => '2', 'link' => 'view/views', 'name' => 'Grafy'],
         $submenuAfterItem , $submenu );
     $this->addMenuItem( ['id' => '5', 'link' => 'inventory/units', 'name' => 'Kódy jednotek'],
-        $submenuAfterItem , $submenu );  
+        $submenuAfterItem , $submenu );
+
+    if( $this->getUser()->isInRole('admin') ) {
+      $this->addMenuItem( ['id' => '6', 'link' => 'user/list', 'name' => 'Uživatelé'],
+      $submenuAfterItem , $submenu );
+      $this->addMenuItem( ['id' => '7', 'link' => 'useracl', 'name' => 'Editácia ACL'],
+        $submenuAfterItem , $submenu );
+    }
+      
 
     $this->template->menuId = $activeItem ;
 
@@ -84,41 +92,23 @@ class BasePresenter extends Nette\Application\UI\Presenter
     $response->setExpiration('1 sec'); 
   }
 
-  /** Funkcia pre zjednodusenie vypisu flash spravy a presmerovania
-   * @param array|string $redirect Adresa presmerovania
-   * @param string $text Text pre vypis hlasenia
-   * @param string $druh - druh hlasenia */
-  public function flashRedirect($redirect, $text = "", $druh = "info") {
-		$this->flashMessage($text, $druh);
-    if (is_array($redirect)) {
-      if (count($redirect) > 1) {
-        if (!$this->isAjax()) {
-          $this->redirect($redirect[0], $redirect[1]);
-        } else {
-          $this->redrawControl();
-        }
-      } elseif (count($redirect) == 1) { $this->redirect($redirect[0]);}
-    } else { 
-      if (!$this->isAjax()) { 
-        $this->redirect($redirect); 
-      } else {
-        $this->redrawControl();
-      }
+  /** 
+   * Komponenta pre vykreslenie menu
+   * @return Menu\Menu */
+  public function createComponentMenu() {
+    $menu = new Menu\Menu;
+    $hl_m = $this->main_menu->getMenu(/*$this->language*/);
+    if (count($hl_m)) {
+      $servise = $this;
+      $menu->fromTable($hl_m, function($node, $row) use($servise) {
+      $poll = ["id", "name", "view_name"/*, "tooltip" , "avatar", "anotacia", "novinka", "node_class" , "poradie_podclankov"*/];
+        foreach ($poll as $v) { $node->$v = $row['node']->$v; }
+        $node->link = is_array($row['node']->link) ? $servise->link($row['node']->link[0], ["id"=>$row['node']->id]) 
+                                                    : $servise->link($row['node']->link);
+        return $row['nadradena'] ? $row['nadradena'] : null;
+      });
     }
-	}
-
-  /**
-   * Funkcia pre zjednodusenie vypisu flash spravy a presmerovania aj pre chybovy stav
-   * @param boolean $ok Podmienka
-   * @param array|string $redirect Adresa presmerovania
-   * @param string $textOk Text pre vypis hlasenia ak je podmienka splnena
-   * @param string $textEr Text pre vypis hlasenia ak NIE je podmienka splnena  */
-  public function flashOut($ok, $redirect, $textOk = "", $textEr = "") {
-    if ($ok) {
-      $this->flashRedirect($redirect, $textOk, "success");
-    } else {
-      $this->flashMessage($textEr, 'danger');
-    }
-  }
-
+    $menu->selectByUrl($this->link('this'));
+    return $menu;
+  }            
 }

@@ -13,7 +13,7 @@ use Nette\Http\Url;
 
 use App\Services\Logger;
 
-class EnrollPresenter extends Nette\Application\UI\Presenter
+class EnrollPresenter extends MainBasePresenter
 {
     /** @var \App\Services\InventoryDataSource */
     private $datasource;

@@ -2,12 +2,19 @@ services:
 
 	# Presenters
 	- App\Presenters\UserPresenter(%parameters%)
+	- App\Presenters\UserAclPresenter(%parameters%)
+
 
   # Models
 	- App\Model\PV_Devices
+	- App\Model\PV_Main_menu
 	- App\Model\PV_User
+	- App\Model\PV_User_permission
+	- App\Model\PV_User_resource
 	- App\Model\PV_User_roles
-	- App\Model\PV_User_state	
+	- App\Model\PV_User_state
 
   # Forms
 	- App\Forms\User\EditUserFormFactory
+
+	authorizator: App\Model\AuthorizatorFactory::create(@Nette\Database\Context)

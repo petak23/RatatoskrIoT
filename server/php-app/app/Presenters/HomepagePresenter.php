@@ -7,7 +7,7 @@ namespace App\Presenters;
 use Nette;
 use Tracy\Debugger;
 
-final class HomepagePresenter extends Nette\Application\UI\Presenter
+final class HomepagePresenter extends MainBasePresenter
 {
     public function renderDefault()
     {

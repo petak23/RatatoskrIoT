@@ -50,7 +50,7 @@ final class VitemPresenter extends BaseAdminPresenter
         }
         
         $form->addMultiSelect( 'sensorIdsArr', 'Senzory:', $sensors )
-            ->setAttribute('size', 20)
+            ->setHtmlAttribute('size', 20)
             ->setOption('description', 'Můžete zvolit více senzorů měřících stejnou veličinu. Zobrazí se data z toho, který zrovna data mít bude.')
             ->setRequired();
 

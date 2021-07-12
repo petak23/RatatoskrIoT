@@ -10,7 +10,7 @@ use Nette\Http;
 use Tracy\ILogger;
 
 
-final class ErrorPresenter implements Nette\Application\IPresenter
+final class ErrorPresenter extends MainBasePresenter
 {
 	use Nette\SmartObject;
 
