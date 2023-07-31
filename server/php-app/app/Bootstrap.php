@@ -24,7 +24,10 @@ class Bootstrap
 			->register();
 
 		$configurator->addConfig(__DIR__ . '/config/common.neon');
-		$configurator->addConfig(__DIR__ . '/config/local.neon');
+		$configurator->addConfig(__DIR__ . '/config/config_local.neon');
+		if (file_exists(__DIR__ . '/config/local.neon')) { // Settings for run on lovalhost - testing
+			$configurator->addConfig(__DIR__ . '/config/local.neon');
+		}
 
 		return $configurator;
 	}
