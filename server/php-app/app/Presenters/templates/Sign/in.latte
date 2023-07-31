@@ -1,4 +1,4 @@
-{layout '../@layoutEmpty.latte'}
+{layout '../@layoutForIn.latte'}
 
 {define content}
 
@@ -6,7 +6,8 @@
 
 {control signInForm}
 
-<p>
-Nemáte účet? <a n:href="Enroll:Step1">Zaregistrujte se</a>.
+<p class="text-end">
+Nemáte účet?
+<a class="ms-1" n:href="Enroll:Step1">Zaregistrujte se</a>.
 
 {/define}
