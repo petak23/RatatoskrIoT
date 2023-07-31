@@ -1,13 +1,12 @@
 {layout '../@layoutForIn.latte'}
 
-{define content}
+{block content}
 
 <h1 n:block=title>Přihlášení</h1>
 
 {control signInForm}
 
-<p class="text-end">
-Nemáte účet?
-<a class="ms-1" n:href="Enroll:Step1">Zaregistrujte se</a>.
-
-{/define}
+<p class="text-end" n:if="$reg_enabled">
+	Nemáte účet?
+	<a class="ms-1" n:href="Enroll:Step1">Zaregistrujte se</a>.
+</p>

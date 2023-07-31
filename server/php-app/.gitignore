@@ -3,4 +3,4 @@ app/config/config_local.neon
 log/*.txt
 temp/
 vendor/
-deployment.ini
+deployment.*

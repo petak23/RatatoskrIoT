@@ -24,6 +24,8 @@ parameters:
 	cronAllowed:
 		- 127.0.0.1
 		- 192.168.32.242
+	# Povolenie registrácie	
+	reg_enabled: false
 
 database:
 	dsn: 'mysql:host=127.0.0.1;dbname=ratatoskr'

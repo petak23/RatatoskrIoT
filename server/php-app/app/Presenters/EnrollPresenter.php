@@ -27,7 +27,8 @@ class EnrollPresenter extends Nette\Application\UI\Presenter
 	/** @persistent */
 	public $email = "";
 
-	public $appName;
+	private $appName;
+	private $reg_enabled;
 
 	public function __construct(Services\EnrollDataSource $datasource, Services\MailService $mailsv, Nette\Security\Passwords $passwords, Services\Config $config)
 	{
@@ -35,6 +36,15 @@ class EnrollPresenter extends Nette\Application\UI\Presenter
 		$this->passwords = $passwords;
 		$this->mailService = $mailsv;
 		$this->appName = $config->appName;
+		$this->reg_enabled = $config->reg_enabled;
+	}
+
+	protected function startup()
+	{
+		if (!$this->reg_enabled) {
+			$this->flashMessage('Registrácia nie je povolená!!!', 'danger');
+			$this->redirect("Sign:in");
+		}
 	}
 
 	public function beforeRender(): void

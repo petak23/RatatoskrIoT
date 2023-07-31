@@ -17,11 +17,13 @@ class SignPresenter extends Nette\Application\UI\Presenter
 	/** @persistent */
 	public $backlink = '';
 
-	public $appName;
+	private $appName;
+	private $reg_enabled;
 
 	public function __construct(Services\Config $config)
 	{
 		$this->appName = $config->appName;
+		$this->reg_enabled = $config->reg_enabled;
 	}
 
 	public function actionIn($username = NULL): void
@@ -36,6 +38,7 @@ class SignPresenter extends Nette\Application\UI\Presenter
 	public function renderIn(): void
 	{
 		$this->template->appName = $this->appName;
+		$this->template->reg_enabled = $this->reg_enabled;
 	}
 
 	protected function createComponentSignInForm(): Form
