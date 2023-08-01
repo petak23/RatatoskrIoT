@@ -8,6 +8,7 @@
 	<link href="{$basePath}/www/css/bootstrap.min.css" rel="stylesheet">
 	<link href="{$basePath}/www/css/sign-in.css" rel="stylesheet">
 	<title>{ifset title}{include title|stripHtml} | {/ifset}RatatoskrIoT</title>
+	{control favicon}
 </head>
 <body>
 <div class="row">
@@ -31,17 +32,10 @@
 	$(function () {
 		$('[data-toggle="tooltip"]').tooltip()
 	})
-	</script>
+	</script>*}
 
-	<script type="text/javascript">
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-	try {
-	var pageTracker = _gat._getTracker("UA-289403-4");
-	pageTracker._trackPageview();
-	} catch(err) {}</script>*}
+	{control googleAnalytics}
+	
 {/block}
 
 </body></html>

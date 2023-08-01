@@ -9,16 +9,13 @@ use Nette\Application\UI\Form;
 use App\Services\Logger;
 use App\Services;
 
-class SignPresenter extends Nette\Application\UI\Presenter
+class SignPresenter extends BaseNotLogPresenter
 {
 	/** @persistent */
 	public $username = '';
 
 	/** @persistent */
 	public $backlink = '';
-
-	private $appName;
-	private $reg_enabled;
 
 	public function __construct(Services\Config $config)
 	{
@@ -33,12 +30,6 @@ class SignPresenter extends Nette\Application\UI\Presenter
 		$response->setExpiration('1 sec');
 
 		$this->username = $username;
-	}
-
-	public function renderIn(): void
-	{
-		$this->template->appName = $this->appName;
-		$this->template->reg_enabled = $this->reg_enabled;
 	}
 
 	protected function createComponentSignInForm(): Form

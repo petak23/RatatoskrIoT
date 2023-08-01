@@ -1,12 +1,17 @@
 # Komponenta pre zobrazenie google analytics
 
 **Inštalácia**
+
 1. nakopírovanie archývu do `app\components`,
 2. do `app\FrontModule\presenters\BasePresenter` doplniť `use PeterVojtech\MainLayout\GoogleAnalytics\googleAnalyticsTrait;`,
-4. do `app\FrontModule\config\services.neon` doplniť:
+3. do `app\FrontModule\config\services.neon` doplniť:
+
 ```neon
+parameters:
+  - ua_code: UA_123456
 services:
-  - PeterVojtech\MainLayout\GoogleAnalytics\IGoogleAnalyticsControl
+  - PeterVojtech\MainLayout\GoogleAnalytics\IGoogleAnalyticsControl(%ua_code%)
 
 ```
-5. do hlavného template `@layout.latte` doplniť na koniec `{control googleAnalytics}`.
+
+4. do hlavného template `@layout.latte` doplniť na koniec `{control googleAnalytics}`.

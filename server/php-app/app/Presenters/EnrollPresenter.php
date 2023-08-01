@@ -14,7 +14,7 @@ use Nette\Http\Url;
 use App\Services\Logger;
 use App\Services;
 
-class EnrollPresenter extends Nette\Application\UI\Presenter
+class EnrollPresenter extends BaseNotLogPresenter
 {
 	/** @var \App\Services\InventoryDataSource */
 	private $datasource;
@@ -26,9 +26,6 @@ class EnrollPresenter extends Nette\Application\UI\Presenter
 
 	/** @persistent */
 	public $email = "";
-
-	private $appName;
-	private $reg_enabled;
 
 	public function __construct(Services\EnrollDataSource $datasource, Services\MailService $mailsv, Nette\Security\Passwords $passwords, Services\Config $config)
 	{
@@ -45,11 +42,6 @@ class EnrollPresenter extends Nette\Application\UI\Presenter
 			$this->flashMessage('Registrácia nie je povolená!!!', 'danger');
 			$this->redirect("Sign:in");
 		}
-	}
-
-	public function beforeRender(): void
-	{
-		$this->template->appName = $this->appName;
 	}
 
 	protected function createComponentEnrollForm(): Form

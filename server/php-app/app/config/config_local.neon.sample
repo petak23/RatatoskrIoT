@@ -26,6 +26,8 @@ parameters:
 		- 192.168.32.242
 	# Povolenie registrácie	
 	reg_enabled: false
+	# Kód pre google analytics
+	ua_code: UA-289403-4 # alebo null
 
 database:
 	dsn: 'mysql:host=127.0.0.1;dbname=ratatoskr'
