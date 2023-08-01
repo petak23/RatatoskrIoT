@@ -11,24 +11,19 @@ namespace Nette\Neon;
 
 
 /**
- * Representation of 'foo(bar=1)' literal
+ * Representation of NEON entity 'foo(bar=1)'
  */
 final class Entity extends \stdClass
 {
-	/** @var mixed */
-	public $value;
-
-	/** @var array */
-	public $attributes;
-
-
-	public function __construct($value, array $attrs = [])
-	{
-		$this->value = $value;
-		$this->attributes = $attrs;
+	public function __construct(
+		public mixed $value,
+		/** @var mixed[] */
+		public array $attributes = [],
+	) {
 	}
 
 
+	/** @param  mixed[]  $properties */
 	public static function __set_state(array $properties)
 	{
 		return new self($properties['value'], $properties['attributes']);

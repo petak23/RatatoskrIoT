@@ -15,12 +15,13 @@ use Nette;
 /**
  * Cache dummy storage.
  */
-class DevNullStorage implements Nette\Caching\IStorage
+class DevNullStorage implements Nette\Caching\Storage
 {
 	use Nette\SmartObject;
 
-	public function read(string $key)
+	public function read(string $key): mixed
 	{
+		return null;
 	}
 
 

@@ -6,6 +6,8 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Symfony\\Thanks\\' => array($vendorDir . '/symfony/thanks/src'),
     'Mdanter\\Ecc\\' => array($vendorDir . '/mdanter/ecc/src'),
     'FG\\' => array($vendorDir . '/fgrosse/phpasn1/lib'),
+    'Contributte\\Webpack\\' => array($vendorDir . '/contributte/webpack/src'),
 );

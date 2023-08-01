@@ -21,39 +21,70 @@ class Cache
 
 	/** dependency */
 	public const
-		PRIORITY = 'priority',
-		EXPIRATION = 'expire',
-		EXPIRE = 'expire',
-		SLIDING = 'sliding',
-		TAGS = 'tags',
-		FILES = 'files',
-		ITEMS = 'items',
-		CONSTS = 'consts',
-		CALLBACKS = 'callbacks',
-		NAMESPACES = 'namespaces',
-		ALL = 'all';
+		Priority = 'priority',
+		Expire = 'expire',
+		Sliding = 'sliding',
+		Tags = 'tags',
+		Files = 'files',
+		Items = 'items',
+		Constants = 'consts',
+		Callbacks = 'callbacks',
+		Namespaces = 'namespaces',
+		All = 'all';
+
+	/** @deprecated use Cache::Priority */
+	public const PRIORITY = self::Priority;
+
+	/** @deprecated use Cache::Expire */
+	public const EXPIRATION = self::Expire;
+
+	/** @deprecated use Cache::Expire */
+	public const EXPIRE = self::Expire;
+
+	/** @deprecated use Cache::Sliding */
+	public const SLIDING = self::Sliding;
+
+	/** @deprecated use Cache::Tags */
+	public const TAGS = self::Tags;
+
+	/** @deprecated use Cache::Files */
+	public const FILES = self::Files;
+
+	/** @deprecated use Cache::Items */
+	public const ITEMS = self::Items;
+
+	/** @deprecated use Cache::Constants */
+	public const CONSTS = self::Constants;
+
+	/** @deprecated use Cache::Callbacks */
+	public const CALLBACKS = self::Callbacks;
+
+	/** @deprecated use Cache::Namespaces */
+	public const NAMESPACES = self::Namespaces;
+
+	/** @deprecated use Cache::All */
+	public const ALL = self::All;
 
 	/** @internal */
-	public const NAMESPACE_SEPARATOR = "\x00";
+	public const
+		NamespaceSeparator = "\x00",
+		NAMESPACE_SEPARATOR = self::NamespaceSeparator;
 
-	/** @var IStorage */
-	private $storage;
-
-	/** @var string */
-	private $namespace;
+	private Storage $storage;
+	private string $namespace;
 
 
-	public function __construct(IStorage $storage, string $namespace = null)
+	public function __construct(Storage $storage, ?string $namespace = null)
 	{
 		$this->storage = $storage;
-		$this->namespace = $namespace . self::NAMESPACE_SEPARATOR;
+		$this->namespace = $namespace . self::NamespaceSeparator;
 	}
 
 
 	/**
 	 * Returns cache storage.
 	 */
-	final public function getStorage(): IStorage
+	final public function getStorage(): Storage
 	{
 		return $this->storage;
 	}
@@ -70,28 +101,32 @@ class Cache
 
 	/**
 	 * Returns new nested cache object.
-	 * @return static
 	 */
-	public function derive(string $namespace)
+	public function derive(string $namespace): static
 	{
-		$derived = new static($this->storage, $this->namespace . $namespace);
-		return $derived;
+		return new static($this->storage, $this->namespace . $namespace);
 	}
 
 
 	/**
 	 * Reads the specified item from the cache or generate it.
-	 * @param  mixed  $key
-	 * @return mixed
 	 */
-	public function load($key, callable $fallback = null)
+	public function load(mixed $key, ?callable $generator = null, ?array $dependencies = null): mixed
 	{
-		$data = $this->storage->read($this->generateKey($key));
-		if ($data === null && $fallback) {
-			return $this->save($key, function (&$dependencies) use ($fallback) {
-				return $fallback(...[&$dependencies]);
-			});
+		$storageKey = $this->generateKey($key);
+		$data = $this->storage->read($storageKey);
+		if ($data === null && $generator) {
+			$this->storage->lock($storageKey);
+			try {
+				$data = $generator(...[&$dependencies]);
+			} catch (\Throwable $e) {
+				$this->storage->remove($storageKey);
+				throw $e;
+			}
+
+			$this->save($key, $data, $dependencies);
 		}
+
 		return $data;
 	}
 
@@ -99,45 +134,45 @@ class Cache
 	/**
 	 * Reads multiple items from the cache.
 	 */
-	public function bulkLoad(array $keys, callable $fallback = null): array
+	public function bulkLoad(array $keys, ?callable $generator = null): array
 	{
 		if (count($keys) === 0) {
 			return [];
 		}
+
 		foreach ($keys as $key) {
 			if (!is_scalar($key)) {
 				throw new Nette\InvalidArgumentException('Only scalar keys are allowed in bulkLoad()');
 			}
 		}
-		$storageKeys = array_map([$this, 'generateKey'], $keys);
-		if (!$this->storage instanceof IBulkReader) {
-			$result = array_combine($keys, array_map([$this->storage, 'read'], $storageKeys));
-			if ($fallback !== null) {
-				foreach ($result as $key => $value) {
-					if ($value === null) {
-						$result[$key] = $this->save($key, function (&$dependencies) use ($key, $fallback) {
-							return $fallback(...[$key, &$dependencies]);
-						});
-					}
-				}
+
+		$result = [];
+		if (!$this->storage instanceof BulkReader) {
+			foreach ($keys as $key) {
+				$result[$key] = $this->load(
+					$key,
+					$generator
+						? fn(&$dependencies) => $generator(...[$key, &$dependencies])
+						: null,
+				);
 			}
+
 			return $result;
 		}
 
+		$storageKeys = array_map([$this, 'generateKey'], $keys);
 		$cacheData = $this->storage->bulkRead($storageKeys);
-		$result = [];
 		foreach ($keys as $i => $key) {
 			$storageKey = $storageKeys[$i];
 			if (isset($cacheData[$storageKey])) {
 				$result[$key] = $cacheData[$storageKey];
-			} elseif ($fallback) {
-				$result[$key] = $this->save($key, function (&$dependencies) use ($key, $fallback) {
-					return $fallback(...[$key, &$dependencies]);
-				});
+			} elseif ($generator) {
+				$result[$key] = $this->load($key, fn(&$dependencies) => $generator(...[$key, &$dependencies]));
 			} else {
 				$result[$key] = null;
 			}
 		}
+
 		return $result;
 	}
 
@@ -145,20 +180,17 @@ class Cache
 	/**
 	 * Writes item into the cache.
 	 * Dependencies are:
-	 * - Cache::PRIORITY => (int) priority
-	 * - Cache::EXPIRATION => (timestamp) expiration
-	 * - Cache::SLIDING => (bool) use sliding expiration?
-	 * - Cache::TAGS => (array) tags
-	 * - Cache::FILES => (array|string) file names
-	 * - Cache::ITEMS => (array|string) cache items
-	 * - Cache::CONSTS => (array|string) cache items
-	 *
-	 * @param  mixed  $key
-	 * @param  mixed  $data
+	 * - Cache::Priority => (int) priority
+	 * - Cache::Expire => (timestamp) expiration
+	 * - Cache::Sliding => (bool) use sliding expiration?
+	 * - Cache::Tags => (array) tags
+	 * - Cache::Files => (array|string) file names
+	 * - Cache::Items => (array|string) cache items
+	 * - Cache::Constants => (array|string) cache items
 	 * @return mixed  value itself
 	 * @throws Nette\InvalidArgumentException
 	 */
-	public function save($key, $data, array $dependencies = null)
+	public function save(mixed $key, mixed $data, ?array $dependencies = null): mixed
 	{
 		$key = $this->generateKey($key);
 
@@ -174,13 +206,15 @@ class Cache
 
 		if ($data === null) {
 			$this->storage->remove($key);
+			return null;
 		} else {
 			$dependencies = $this->completeDependencies($dependencies);
-			if (isset($dependencies[self::EXPIRATION]) && $dependencies[self::EXPIRATION] <= 0) {
+			if (isset($dependencies[self::Expire]) && $dependencies[self::Expire] <= 0) {
 				$this->storage->remove($key);
 			} else {
 				$this->storage->write($key, $data, $dependencies);
 			}
+
 			return $data;
 		}
 	}
@@ -189,53 +223,55 @@ class Cache
 	private function completeDependencies(?array $dp): array
 	{
 		// convert expire into relative amount of seconds
-		if (isset($dp[self::EXPIRATION])) {
-			$dp[self::EXPIRATION] = Nette\Utils\DateTime::from($dp[self::EXPIRATION])->format('U') - time();
+		if (isset($dp[self::Expire])) {
+			$dp[self::Expire] = Nette\Utils\DateTime::from($dp[self::Expire])->format('U') - time();
 		}
 
 		// make list from TAGS
-		if (isset($dp[self::TAGS])) {
-			$dp[self::TAGS] = array_values((array) $dp[self::TAGS]);
+		if (isset($dp[self::Tags])) {
+			$dp[self::Tags] = array_values((array) $dp[self::Tags]);
 		}
 
 		// make list from NAMESPACES
-		if (isset($dp[self::NAMESPACES])) {
-			$dp[self::NAMESPACES] = array_values((array) $dp[self::NAMESPACES]);
+		if (isset($dp[self::Namespaces])) {
+			$dp[self::Namespaces] = array_values((array) $dp[self::Namespaces]);
 		}
 
 		// convert FILES into CALLBACKS
-		if (isset($dp[self::FILES])) {
-			foreach (array_unique((array) $dp[self::FILES]) as $item) {
-				$dp[self::CALLBACKS][] = [[__CLASS__, 'checkFile'], $item, @filemtime($item) ?: null]; // @ - stat may fail
+		if (isset($dp[self::Files])) {
+			foreach (array_unique((array) $dp[self::Files]) as $item) {
+				$dp[self::Callbacks][] = [[self::class, 'checkFile'], $item, @filemtime($item) ?: null]; // @ - stat may fail
 			}
-			unset($dp[self::FILES]);
+
+			unset($dp[self::Files]);
 		}
 
 		// add namespaces to items
-		if (isset($dp[self::ITEMS])) {
-			$dp[self::ITEMS] = array_unique(array_map([$this, 'generateKey'], (array) $dp[self::ITEMS]));
+		if (isset($dp[self::Items])) {
+			$dp[self::Items] = array_unique(array_map([$this, 'generateKey'], (array) $dp[self::Items]));
 		}
 
 		// convert CONSTS into CALLBACKS
-		if (isset($dp[self::CONSTS])) {
-			foreach (array_unique((array) $dp[self::CONSTS]) as $item) {
-				$dp[self::CALLBACKS][] = [[__CLASS__, 'checkConst'], $item, constant($item)];
+		if (isset($dp[self::Constants])) {
+			foreach (array_unique((array) $dp[self::Constants]) as $item) {
+				$dp[self::Callbacks][] = [[self::class, 'checkConst'], $item, constant($item)];
 			}
-			unset($dp[self::CONSTS]);
+
+			unset($dp[self::Constants]);
 		}
 
 		if (!is_array($dp)) {
 			$dp = [];
 		}
+
 		return $dp;
 	}
 
 
 	/**
 	 * Removes item from the cache.
-	 * @param  mixed  $key
 	 */
-	public function remove($key): void
+	public function remove(mixed $key): void
 	{
 		$this->save($key, null);
 	}
@@ -244,67 +280,75 @@ class Cache
 	/**
 	 * Removes items from the cache by conditions.
 	 * Conditions are:
-	 * - Cache::PRIORITY => (int) priority
-	 * - Cache::TAGS => (array) tags
-	 * - Cache::ALL => true
+	 * - Cache::Priority => (int) priority
+	 * - Cache::Tags => (array) tags
+	 * - Cache::All => true
 	 */
-	public function clean(array $conditions = null): void
+	public function clean(?array $conditions = null): void
 	{
 		$conditions = (array) $conditions;
-		if (isset($conditions[self::TAGS])) {
-			$conditions[self::TAGS] = array_values((array) $conditions[self::TAGS]);
+		if (isset($conditions[self::Tags])) {
+			$conditions[self::Tags] = array_values((array) $conditions[self::Tags]);
 		}
+
 		$this->storage->clean($conditions);
 	}
 
 
 	/**
 	 * Caches results of function/method calls.
-	 * @return mixed
 	 */
-	public function call(callable $function)
+	public function call(callable $function): mixed
 	{
 		$key = func_get_args();
 		if (is_array($function) && is_object($function[0])) {
 			$key[0][0] = get_class($function[0]);
 		}
-		return $this->load($key, function () use ($function, $key) {
-			return $function(...array_slice($key, 1));
-		});
+
+		return $this->load($key, fn() => $function(...array_slice($key, 1)));
 	}
 
 
 	/**
 	 * Caches results of function/method calls.
 	 */
-	public function wrap(callable $function, array $dependencies = null): \Closure
+	public function wrap(callable $function, ?array $dependencies = null): \Closure
 	{
 		return function () use ($function, $dependencies) {
-			$key = [$function, func_get_args()];
+			$key = [$function, $args = func_get_args()];
 			if (is_array($function) && is_object($function[0])) {
 				$key[0][0] = get_class($function[0]);
 			}
-			$data = $this->load($key);
-			if ($data === null) {
-				$data = $this->save($key, $function(...$key[1]), $dependencies);
-			}
-			return $data;
+
+			return $this->load($key, function (&$deps) use ($function, $args, $dependencies) {
+				$deps = $dependencies;
+				return $function(...$args);
+			});
 		};
 	}
 
 
 	/**
 	 * Starts the output cache.
-	 * @param  mixed  $key
 	 */
-	public function start($key): ?OutputHelper
+	public function capture(mixed $key): ?OutputHelper
 	{
 		$data = $this->load($key);
 		if ($data === null) {
 			return new OutputHelper($this, $key);
 		}
+
 		echo $data;
 		return null;
+	}
+
+
+	/**
+	 * @deprecated  use capture()
+	 */
+	public function start($key): ?OutputHelper
+	{
+		return $this->capture($key);
 	}
 
 
@@ -330,6 +374,7 @@ class Cache
 				return false;
 			}
 		}
+
 		return true;
 	}
 

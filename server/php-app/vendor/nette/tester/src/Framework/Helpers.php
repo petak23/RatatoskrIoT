@@ -23,9 +23,11 @@ class Helpers
 		if (preg_match('#^(\w:)?[/\\\\]?$#', $dir)) {
 			throw new \InvalidArgumentException('Directory must not be an empty string or root path.');
 		}
+
 		if (!is_dir($dir)) {
 			mkdir($dir);
 		}
+
 		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST) as $entry) {
 			if ($entry->isDir()) {
 				rmdir((string) $entry);
@@ -39,6 +41,7 @@ class Helpers
 	/**
 	 * Find common directory for given paths. All files or directories must exist.
 	 * @return string  Empty when not found. Slash and back slash chars normalized to DIRECTORY_SEPARATOR.
+	 * @internal
 	 */
 	public static function findCommonDirectory(array $paths): string
 	{
@@ -49,6 +52,7 @@ class Helpers
 			} elseif ($real === false) {
 				throw new \RuntimeException("File or directory '$s' does not exist.");
 			}
+
 			return explode(DIRECTORY_SEPARATOR, $real);
 		}, $paths);
 
@@ -60,6 +64,7 @@ class Helpers
 				}
 			}
 		}
+
 		$common = implode(DIRECTORY_SEPARATOR, array_slice($first, 0, $i));
 		return is_dir($common) ? $common : dirname($common);
 	}
@@ -75,9 +80,11 @@ class Helpers
 		if (!preg_match('#^/\*\*(.*?)\*/#ms', $s, $content)) {
 			return [];
 		}
+
 		if (preg_match('#^[ \t\*]*+([^\s@].*)#mi', $content[1], $matches)) {
 			$options[0] = trim($matches[1]);
 		}
+
 		preg_match_all('#^[ \t\*]*@(\w+)([^\w\r\n].*)?#mi', $content[1], $matches, PREG_SET_ORDER);
 		foreach ($matches as $match) {
 			$ref = &$options[strtolower($match[1])];
@@ -85,8 +92,10 @@ class Helpers
 				$ref = (array) $ref;
 				$ref = &$ref[];
 			}
+
 			$ref = isset($match[2]) ? trim($match[2]) : '';
 		}
+
 		return $options;
 	}
 
@@ -102,12 +111,14 @@ class Helpers
 				return $name;
 			}
 		}
+
 		return 'Unknown error';
 	}
 
 
 	/**
 	 * Escape a string to be used as a shell argument.
+	 * @internal
 	 */
 	public static function escapeArg(string $s): string
 	{
@@ -118,5 +129,24 @@ class Helpers
 		return defined('PHP_WINDOWS_VERSION_BUILD')
 			? '"' . str_replace('"', '""', $s) . '"'
 			: escapeshellarg($s);
+	}
+
+
+	/**
+	 * @internal
+	 */
+	public static function prepareTempDir(string $path): string
+	{
+		$real = realpath($path);
+		if ($real === false || !is_dir($real) || !is_writable($real)) {
+			throw new \RuntimeException("Path '$real' is not a writable directory.");
+		}
+
+		$path = $real . DIRECTORY_SEPARATOR . 'Tester';
+		if (!is_dir($path) && @mkdir($path) === false && !is_dir($path)) {  // @ - directory may exist
+			throw new \RuntimeException("Cannot create '$path' directory.");
+		}
+
+		return $path;
 	}
 }

@@ -15,7 +15,7 @@ use Nette;
 /**
  * Class method.
  *
- * @property string|null $body
+ * @property-deprecated string|null $body
  */
 final class Method
 {
@@ -24,24 +24,14 @@ final class Method
 	use Traits\NameAware;
 	use Traits\VisibilityAware;
 	use Traits\CommentAware;
+	use Traits\AttributeAware;
 
-	/** @var string|null */
-	private $body = '';
-
-	/** @var bool */
-	private $static = false;
-
-	/** @var bool */
-	private $final = false;
-
-	/** @var bool */
-	private $abstract = false;
+	private bool $static = false;
+	private bool $final = false;
+	private bool $abstract = false;
 
 
-	/**
-	 * @param  string|array  $method
-	 */
-	public static function from($method): self
+	public static function from(string|array $method): static
 	{
 		return (new Factory)->fromMethodReflection(Nette\Utils\Callback::toReflection($method));
 	}
@@ -49,34 +39,11 @@ final class Method
 
 	public function __toString(): string
 	{
-		try {
-			return (new Printer)->printMethod($this);
-		} catch (\Throwable $e) {
-			if (PHP_VERSION_ID >= 70400) {
-				throw $e;
-			}
-			trigger_error('Exception in ' . __METHOD__ . "(): {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}", E_USER_ERROR);
-			return '';
-		}
+		return (new Printer)->printMethod($this);
 	}
 
 
-	/** @return static */
-	public function setBody(?string $code, array $args = null): self
-	{
-		$this->body = $args === null || $code === null ? $code : (new Dumper)->format($code, ...$args);
-		return $this;
-	}
-
-
-	public function getBody(): ?string
-	{
-		return $this->body;
-	}
-
-
-	/** @return static */
-	public function setStatic(bool $state = true): self
+	public function setStatic(bool $state = true): static
 	{
 		$this->static = $state;
 		return $this;
@@ -89,8 +56,7 @@ final class Method
 	}
 
 
-	/** @return static */
-	public function setFinal(bool $state = true): self
+	public function setFinal(bool $state = true): static
 	{
 		$this->final = $state;
 		return $this;
@@ -103,8 +69,7 @@ final class Method
 	}
 
 
-	/** @return static */
-	public function setAbstract(bool $state = true): self
+	public function setAbstract(bool $state = true): static
 	{
 		$this->abstract = $state;
 		return $this;
@@ -117,11 +82,25 @@ final class Method
 	}
 
 
+	/**
+	 * @param  string  $name without $
+	 */
+	public function addPromotedParameter(string $name, mixed $defaultValue = null): PromotedParameter
+	{
+		$param = new PromotedParameter($name);
+		if (func_num_args() > 1) {
+			$param->setDefaultValue($defaultValue);
+		}
+
+		return $this->parameters[$name] = $param;
+	}
+
+
 	/** @throws Nette\InvalidStateException */
 	public function validate(): void
 	{
-		if ($this->abstract && ($this->final || $this->visibility === ClassType::VISIBILITY_PRIVATE)) {
-			throw new Nette\InvalidStateException('Method cannot be abstract and final or private.');
+		if ($this->abstract && ($this->final || $this->visibility === ClassLike::VisibilityPrivate)) {
+			throw new Nette\InvalidStateException("Method $this->name() cannot be abstract and final or private at the same time.");
 		}
 	}
 }

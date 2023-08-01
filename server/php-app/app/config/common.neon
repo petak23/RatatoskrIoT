@@ -15,7 +15,7 @@ session:
 	debugger: true
 
 services:
-	- App\Services\MailService(...,  %from%, %admin% )
+	- App\Services\MailService(_,  %from%, %admin% )
 	- App\Services\CrontaskDataSource
 	- App\Services\EnrollDataSource
 	- App\Services\RaDataSource
@@ -23,6 +23,7 @@ services:
 	- App\Services\MsgProcessor
 	- App\Services\Config( %cronAllowed%, %masterPassword%, %links%, %title%, %font%, %fontBold%, %dataRetentionDays%,  %minYear%, %reg_enabled%)
 	- App\Services\InventoryDataSource
+	- PeterVojtech\MainLayout\Favicon\IFaviconControl
 	security.passwords: Nette\Security\Passwords(::PASSWORD_BCRYPT, [cost: 11])		# zde se nastavuji pozadovane parametry hesla https://doc.nette.org/cs/3.0/passwords
 	router: App\Router\RouterFactory::createRouter
 	authenticator: App\Services\RaAuthenticator

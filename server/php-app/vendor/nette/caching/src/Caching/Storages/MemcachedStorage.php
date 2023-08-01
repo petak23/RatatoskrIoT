@@ -16,24 +16,19 @@ use Nette\Caching\Cache;
 /**
  * Memcached storage using memcached extension.
  */
-class MemcachedStorage implements Nette\Caching\IStorage, Nette\Caching\IBulkReader
+class MemcachedStorage implements Nette\Caching\Storage, Nette\Caching\BulkReader
 {
 	use Nette\SmartObject;
 
 	/** @internal cache structure */
 	private const
-		META_CALLBACKS = 'callbacks',
-		META_DATA = 'data',
-		META_DELTA = 'delta';
+		MetaCallbacks = 'callbacks',
+		MetaData = 'data',
+		MetaDelta = 'delta';
 
-	/** @var \Memcached */
-	private $memcached;
-
-	/** @var string */
-	private $prefix;
-
-	/** @var IJournal */
-	private $journal;
+	private \Memcached $memcached;
+	private string $prefix;
+	private ?Journal $journal;
 
 
 	/**
@@ -45,8 +40,12 @@ class MemcachedStorage implements Nette\Caching\IStorage, Nette\Caching\IBulkRea
 	}
 
 
-	public function __construct(string $host = 'localhost', int $port = 11211, string $prefix = '', IJournal $journal = null)
-	{
+	public function __construct(
+		string $host = 'localhost',
+		int $port = 11211,
+		string $prefix = '',
+		?Journal $journal = null,
+	) {
 		if (!static::isAvailable()) {
 			throw new Nette\NotSupportedException("PHP extension 'memcached' is not loaded.");
 		}
@@ -62,7 +61,7 @@ class MemcachedStorage implements Nette\Caching\IStorage, Nette\Caching\IBulkRea
 
 	public function addServer(string $host = 'localhost', int $port = 11211): void
 	{
-		if ($this->memcached->addServer($host, $port, 1) === false) {
+		if (@$this->memcached->addServer($host, $port, 1) === false) { // @ is escalated to exception
 			$error = error_get_last();
 			throw new Nette\InvalidStateException("Memcached::addServer(): $error[message].");
 		}
@@ -75,7 +74,7 @@ class MemcachedStorage implements Nette\Caching\IStorage, Nette\Caching\IBulkRea
 	}
 
 
-	public function read(string $key)
+	public function read(string $key): mixed
 	{
 		$key = urlencode($this->prefix . $key);
 		$meta = $this->memcached->get($key);
@@ -91,39 +90,38 @@ class MemcachedStorage implements Nette\Caching\IStorage, Nette\Caching\IBulkRea
 		// )
 
 		// verify dependencies
-		if (!empty($meta[self::META_CALLBACKS]) && !Cache::checkCallbacks($meta[self::META_CALLBACKS])) {
+		if (!empty($meta[self::MetaCallbacks]) && !Cache::checkCallbacks($meta[self::MetaCallbacks])) {
 			$this->memcached->delete($key, 0);
 			return null;
 		}
 
-		if (!empty($meta[self::META_DELTA])) {
-			$this->memcached->replace($key, $meta, $meta[self::META_DELTA] + time());
+		if (!empty($meta[self::MetaDelta])) {
+			$this->memcached->replace($key, $meta, $meta[self::MetaDelta] + time());
 		}
 
-		return $meta[self::META_DATA];
+		return $meta[self::MetaData];
 	}
 
 
 	public function bulkRead(array $keys): array
 	{
-		$prefixedKeys = array_map(function ($key) {
-			return urlencode($this->prefix . $key);
-		}, $keys);
+		$prefixedKeys = array_map(fn($key) => urlencode($this->prefix . $key), $keys);
 		$keys = array_combine($prefixedKeys, $keys);
 		$metas = $this->memcached->getMulti($prefixedKeys);
 		$result = [];
 		$deleteKeys = [];
 		foreach ($metas as $prefixedKey => $meta) {
-			if (!empty($meta[self::META_CALLBACKS]) && !Cache::checkCallbacks($meta[self::META_CALLBACKS])) {
+			if (!empty($meta[self::MetaCallbacks]) && !Cache::checkCallbacks($meta[self::MetaCallbacks])) {
 				$deleteKeys[] = $prefixedKey;
 			} else {
-				$result[$keys[$prefixedKey]] = $meta[self::META_DATA];
+				$result[$keys[$prefixedKey]] = $meta[self::MetaData];
 			}
 
-			if (!empty($meta[self::META_DELTA])) {
-				$this->memcached->replace($prefixedKey, $meta, $meta[self::META_DELTA] + time());
+			if (!empty($meta[self::MetaDelta])) {
+				$this->memcached->replace($prefixedKey, $meta, $meta[self::MetaDelta] + time());
 			}
 		}
+
 		if (!empty($deleteKeys)) {
 			$this->memcached->deleteMulti($deleteKeys, 0);
 		}
@@ -139,31 +137,32 @@ class MemcachedStorage implements Nette\Caching\IStorage, Nette\Caching\IBulkRea
 
 	public function write(string $key, $data, array $dp): void
 	{
-		if (isset($dp[Cache::ITEMS])) {
+		if (isset($dp[Cache::Items])) {
 			throw new Nette\NotSupportedException('Dependent items are not supported by MemcachedStorage.');
 		}
 
 		$key = urlencode($this->prefix . $key);
 		$meta = [
-			self::META_DATA => $data,
+			self::MetaData => $data,
 		];
 
 		$expire = 0;
-		if (isset($dp[Cache::EXPIRATION])) {
-			$expire = (int) $dp[Cache::EXPIRATION];
-			if (!empty($dp[Cache::SLIDING])) {
-				$meta[self::META_DELTA] = $expire; // sliding time
+		if (isset($dp[Cache::Expire])) {
+			$expire = (int) $dp[Cache::Expire];
+			if (!empty($dp[Cache::Sliding])) {
+				$meta[self::MetaDelta] = $expire; // sliding time
 			}
 		}
 
-		if (isset($dp[Cache::CALLBACKS])) {
-			$meta[self::META_CALLBACKS] = $dp[Cache::CALLBACKS];
+		if (isset($dp[Cache::Callbacks])) {
+			$meta[self::MetaCallbacks] = $dp[Cache::Callbacks];
 		}
 
-		if (isset($dp[Cache::TAGS]) || isset($dp[Cache::PRIORITY])) {
+		if (isset($dp[Cache::Tags]) || isset($dp[Cache::Priority])) {
 			if (!$this->journal) {
 				throw new Nette\InvalidStateException('CacheJournal has not been provided.');
 			}
+
 			$this->journal->write($key, $dp);
 		}
 
@@ -179,7 +178,7 @@ class MemcachedStorage implements Nette\Caching\IStorage, Nette\Caching\IBulkRea
 
 	public function clean(array $conditions): void
 	{
-		if (!empty($conditions[Cache::ALL])) {
+		if (!empty($conditions[Cache::All])) {
 			$this->memcached->flush();
 
 		} elseif ($this->journal) {

@@ -15,15 +15,14 @@ use Nette;
 /**
  * Memory cache storage.
  */
-class MemoryStorage implements Nette\Caching\IStorage
+class MemoryStorage implements Nette\Caching\Storage
 {
 	use Nette\SmartObject;
 
-	/** @var array */
-	private $data = [];
+	private array $data = [];
 
 
-	public function read(string $key)
+	public function read(string $key): mixed
 	{
 		return $this->data[$key] ?? null;
 	}
@@ -48,7 +47,7 @@ class MemoryStorage implements Nette\Caching\IStorage
 
 	public function clean(array $conditions): void
 	{
-		if (!empty($conditions[Nette\Caching\Cache::ALL])) {
+		if (!empty($conditions[Nette\Caching\Cache::All])) {
 			$this->data = [];
 		}
 	}

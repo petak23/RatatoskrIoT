@@ -1,12 +1,22 @@
 {
-	"name": "nette/web-project",
-	"description": "Nette: Standard Web Project",
-	"keywords": ["nette"],
+	"name": "petak23/ratatoskriot",
+	"description": "Iot web Nette project",
+	"keywords": ["nette", "Iot", "RatatoskrIoT", "petak23"],
 	"type": "project",
 	"license": ["MIT", "BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
+	"authors": [
+		{
+			"name": "Petr Brouzda",
+			"homepage": "https://pebrou.wordpress.com"
+		},
+		{
+			"name": "Peter Vojtech",
+			"homepage": "http://petak23.echo-msz.eu"
+		}
+	],
 	"require": {
 		"php": ">= 7.1",
-		"nette/application": "^3.0.6",
+		"nette/application": "^3.1",
 		"nette/bootstrap": "^3.0",
 		"nette/caching": "^3.0",
 		"nette/database": "^3.0",
@@ -17,16 +27,24 @@
 		"nette/mail": "^3.0",
 		"nette/robot-loader": "^3.0",
 		"nette/security": "^3.0",
-		"nette/utils": "^3.0",
-		"latte/latte": "^2.5",
-		"tracy/tracy": "^2.6",
-		"mdanter/ecc": "^1.0"
+		"nette/utils": "^3.2",
+		"latte/latte": "^2.10",
+		"tracy/tracy": "^2.9",
+		"mdanter/ecc": "^1.0",
+		"dg/adminer-custom": "^1.24",
+		"contributte/webpack": "^2.1"
 	},
 	"require-dev": {
-		"nette/tester": "^2.0"
+		"nette/tester": "^2.4",
+		"symfony/thanks": "^1"
 	},
 	"autoload": {
 		"classmap": ["app/Bootstrap.php"]
 	},
-	"minimum-stability": "stable"
+	"minimum-stability": "stable",
+	"config": {
+		"allow-plugins": {
+			"symfony/thanks": true
+		}
+	}
 }

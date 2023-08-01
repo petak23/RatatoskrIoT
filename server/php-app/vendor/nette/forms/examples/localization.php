@@ -19,7 +19,7 @@ use Tracy\Dumper;
 Debugger::enable();
 
 
-class MyTranslator implements Nette\Localization\ITranslator
+class MyTranslator implements Nette\Localization\Translator
 {
 	private $table;
 
@@ -51,8 +51,8 @@ $form->addText('name', 'Your name:')
 
 $form->addText('age', 'Your age:')
 	->setRequired('Enter your age')
-	->addRule($form::INTEGER, 'Age must be numeric value')
-	->addRule($form::RANGE, 'Age must be in range from %d to %d', [10, 100]);
+	->addRule($form::Integer, 'Age must be numeric value')
+	->addRule($form::Range, 'Age must be in range from %d to %d', [10, 100]);
 
 $countries = [
 	'World' => [
@@ -84,6 +84,6 @@ if ($form->isSuccess()) {
 
 <h1>Nette Forms localization example</h1>
 
-<?php echo $form ?>
+<?php $form->render() ?>
 
 <footer><a href="https://doc.nette.org/en/forms">see documentation</a></footer>

@@ -20,14 +20,10 @@ use Tester\Helpers;
  */
 class CliTester
 {
-	/** @var array */
-	private $options;
-
-	/** @var PhpInterpreter */
-	private $interpreter;
-
-	/** @var bool */
-	private $debugMode = true;
+	private array $options;
+	private PhpInterpreter $interpreter;
+	private bool $debugMode = true;
+	private ?string $stdoutFormat = null;
 
 
 	public function run(): ?int
@@ -41,7 +37,7 @@ class CliTester
 		$this->debugMode = (bool) $this->options['--debug'];
 		if (isset($this->options['--colors'])) {
 			Environment::$useColors = (bool) $this->options['--colors'];
-		} elseif (in_array($this->options['-o'], ['tap', 'junit'], true)) {
+		} elseif (in_array($this->stdoutFormat, ['tap', 'junit'], true)) {
 			Environment::$useColors = false;
 		}
 
@@ -54,22 +50,26 @@ class CliTester
 
 		if ($this->options['--info']) {
 			$job = new Job(new Test(__DIR__ . '/info.php'), $this->interpreter);
+			$job->setTempDirectory($this->options['--temp']);
 			$job->run();
 			echo $job->getTest()->stdout;
 			return null;
 		}
 
 		$runner = $this->createRunner();
-		$runner->setEnvironmentVariable(Environment::RUNNER, '1');
-		$runner->setEnvironmentVariable(Environment::COLORS, (string) (int) Environment::$useColors);
+		$runner->setEnvironmentVariable(Environment::VariableRunner, '1');
+		$runner->setEnvironmentVariable(Environment::VariableColors, (string) (int) Environment::$useColors);
+
+		$this->installInterruptHandler();
 
 		if ($this->options['--coverage']) {
 			$coverageFile = $this->prepareCodeCoverage($runner);
 		}
 
-		if ($this->options['-o'] !== null) {
+		if ($this->stdoutFormat !== null) {
 			ob_clean();
 		}
+
 		ob_end_flush();
 
 		if ($this->options['--watch']) {
@@ -89,52 +89,77 @@ class CliTester
 
 	private function loadOptions(): CommandLine
 	{
+		$outputFiles = [];
+
 		echo <<<'XX'
- _____ ___  ___ _____ ___  ___
-|_   _/ __)( __/_   _/ __)| _ )
-  |_| \___ /___) |_| \___ |_|_\  v2.3.3
+			 _____ ___  ___ _____ ___  ___
+			|_   _/ __)( __/_   _/ __)| _ )
+			  |_| \___ /___) |_| \___ |_|_\  v2.5.1
 
 
-XX;
+			XX;
 
-		$cmd = new CommandLine(<<<'XX'
-Usage:
-    tester.php [options] [<test file> | <directory>]...
+		$cmd = new CommandLine(
+			<<<'XX'
+				Usage:
+				    tester [options] [<test file> | <directory>]...
 
-Options:
-    -p <path>                    Specify PHP interpreter to run (default: php).
-    -c <path>                    Look for php.ini file (or look in directory) <path>.
-    -C                           Use system-wide php.ini.
-    -l | --log <path>            Write log to file <path>.
-    -d <key=value>...            Define INI entry 'key' with value 'value'.
-    -s                           Show information about skipped tests.
-    --stop-on-fail               Stop execution upon the first failure.
-    -j <num>                     Run <num> jobs in parallel (default: 8).
-    -o <console|tap|junit|none>  Specify output format.
-    -w | --watch <path>          Watch directory.
-    -i | --info                  Show tests environment info and exit.
-    --setup <path>               Script for runner setup.
-    --temp <path>                Path to temporary directory. Default by sys_get_temp_dir().
-    --colors [1|0]               Enable or disable colors.
-    --coverage <path>            Generate code coverage report to file.
-    --coverage-src <path>        Path to source code.
-    -h | --help                  This help.
+				Options:
+				    -p <path>                    Specify PHP interpreter to run (default: php).
+				    -c <path>                    Look for php.ini file (or look in directory) <path>.
+				    -C                           Use system-wide php.ini.
+				    -d <key=value>...            Define INI entry 'key' with value 'value'.
+				    -s                           Show information about skipped tests.
+				    --stop-on-fail               Stop execution upon the first failure.
+				    -j <num>                     Run <num> jobs in parallel (default: 8).
+				    -o <console|tap|junit|log|none>  (e.g. -o junit:output.xml)
+				                                 Specify one or more output formats with optional file name.
+				    -w | --watch <path>          Watch directory.
+				    -i | --info                  Show tests environment info and exit.
+				    --setup <path>               Script for runner setup.
+				    --temp <path>                Path to temporary directory. Default by sys_get_temp_dir().
+				    --colors [1|0]               Enable or disable colors.
+				    --coverage <path>            Generate code coverage report to file.
+				    --coverage-src <path>        Path to source code.
+				    -h | --help                  This help.
 
-XX
-		, [
-			'-c' => [CommandLine::REALPATH => true],
-			'--watch' => [CommandLine::REPEATABLE => true, CommandLine::REALPATH => true],
-			'--setup' => [CommandLine::REALPATH => true],
-			'--temp' => [CommandLine::REALPATH => true],
-			'paths' => [CommandLine::REPEATABLE => true, CommandLine::VALUE => getcwd()],
-			'--debug' => [],
-			'--cider' => [],
-			'--coverage-src' => [CommandLine::REALPATH => true, CommandLine::REPEATABLE => true],
-		]);
+				XX,
+			[
+				'-c' => [CommandLine::RealPath => true],
+				'--watch' => [CommandLine::Repeatable => true, CommandLine::RealPath => true],
+				'--setup' => [CommandLine::RealPath => true],
+				'--temp' => [],
+				'paths' => [CommandLine::Repeatable => true, CommandLine::Value => getcwd()],
+				'--debug' => [],
+				'--cider' => [],
+				'--coverage-src' => [CommandLine::RealPath => true, CommandLine::Repeatable => true],
+				'-o' => [CommandLine::Repeatable => true, CommandLine::Normalizer => function ($arg) use (&$outputFiles) {
+					[$format, $file] = explode(':', $arg, 2) + [1 => null];
+
+					if (isset($outputFiles[$file])) {
+						throw new \Exception(
+							$file === null
+								? 'Option -o <format> without file name parameter can be used only once.'
+								: "Cannot specify output by -o into file '$file' more then once."
+						);
+					} elseif ($file === null) {
+						$this->stdoutFormat = $format;
+					}
+
+					$outputFiles[$file] = true;
+
+					return [$format, $file];
+				}],
+			]
+		);
 
 		if (isset($_SERVER['argv'])) {
-			if ($tmp = array_search('-log', $_SERVER['argv'], true)) {
-				$_SERVER['argv'][$tmp] = '--log';
+			if (($tmp = array_search('-l', $_SERVER['argv'], true))
+				|| ($tmp = array_search('-log', $_SERVER['argv'], true))
+				|| ($tmp = array_search('--log', $_SERVER['argv'], true))
+			) {
+				$_SERVER['argv'][$tmp] = '-o';
+				$_SERVER['argv'][$tmp + 1] = 'log:' . $_SERVER['argv'][$tmp + 1];
 			}
 
 			if ($tmp = array_search('--tap', $_SERVER['argv'], true)) {
@@ -150,8 +175,10 @@ XX
 			} elseif (($real = realpath($temp)) === false) {
 				echo "Note: System temporary directory '$temp' does not exist.\n";
 			} else {
-				$this->options['--temp'] = rtrim($real, DIRECTORY_SEPARATOR);
+				$this->options['--temp'] = Helpers::prepareTempDir($real);
 			}
+		} else {
+			$this->options['--temp'] = Helpers::prepareTempDir($this->options['--temp']);
 		}
 
 		return $cmd;
@@ -167,7 +194,7 @@ XX
 			echo "Note: No php.ini is used.\n";
 		}
 
-		if (in_array($this->options['-o'], ['tap', 'junit'], true)) {
+		if (in_array($this->stdoutFormat, ['tap', 'junit'], true)) {
 			array_push($args, '-d', 'html_errors=off');
 		}
 
@@ -188,33 +215,28 @@ XX
 		$runner = new Runner($this->interpreter);
 		$runner->paths = $this->options['paths'];
 		$runner->threadCount = max(1, (int) $this->options['-j']);
-		$runner->stopOnFail = $this->options['--stop-on-fail'];
+		$runner->stopOnFail = (bool) $this->options['--stop-on-fail'];
+		$runner->setTempDirectory($this->options['--temp']);
 
-		if ($this->options['--temp'] !== null) {
-			$runner->setTempDirectory($this->options['--temp']);
+		if ($this->stdoutFormat === null) {
+			$runner->outputHandlers[] = new Output\ConsolePrinter(
+				$runner,
+				(bool) $this->options['-s'],
+				'php://output',
+				(bool) $this->options['--cider']
+			);
 		}
 
-		switch ($this->options['-o']) {
-			case 'none':
-				break;
-			case 'tap':
-				$runner->outputHandlers[] = new Output\TapPrinter;
-				break;
-			case 'junit':
-				$runner->outputHandlers[] = new Output\JUnitPrinter;
-				break;
-			default:
-				$runner->outputHandlers[] = new Output\ConsolePrinter(
-					$runner,
-					(bool) $this->options['-s'],
-					'php://output',
-					(bool) $this->options['--cider']
-				);
-		}
-
-		if ($this->options['--log']) {
-			echo "Log: {$this->options['--log']}\n";
-			$runner->outputHandlers[] = new Output\Logger($runner, $this->options['--log']);
+		foreach ($this->options['-o'] as $output) {
+			[$format, $file] = $output;
+			match ($format) {
+				'console' => $runner->outputHandlers[] = new Output\ConsolePrinter($runner, (bool) $this->options['-s'], $file, (bool) $this->options['--cider']),
+				'tap' => $runner->outputHandlers[] = new Output\TapPrinter($file),
+				'junit' => $runner->outputHandlers[] = new Output\JUnitPrinter($file),
+				'log' => $runner->outputHandlers[] = new Output\Logger($runner, $file),
+				'none' => null,
+				default => throw new \LogicException("Undefined output printer '$format'.'"),
+			};
 		}
 
 		if ($this->options['--setup']) {
@@ -222,6 +244,7 @@ XX
 				require func_get_arg(0);
 			})($this->options['--setup']);
 		}
+
 		return $runner;
 	}
 
@@ -236,10 +259,16 @@ XX
 		file_put_contents($this->options['--coverage'], '');
 		$file = realpath($this->options['--coverage']);
 
-		$runner->setEnvironmentVariable(Environment::COVERAGE, $file);
-		$runner->setEnvironmentVariable(Environment::COVERAGE_ENGINE, $engine = reset($engines));
+		[$engine, $version] = reset($engines);
 
-		if ($engine === CodeCoverage\Collector::ENGINE_PCOV && count($this->options['--coverage-src'])) {
+		$runner->setEnvironmentVariable(Environment::VariableCoverage, $file);
+		$runner->setEnvironmentVariable(Environment::VariableCoverageEngine, $engine);
+
+		if ($engine === CodeCoverage\Collector::EngineXdebug && version_compare($version, '3.0.0', '>=')) {
+			$runner->addPhpIniOption('xdebug.mode', ltrim(ini_get('xdebug.mode') . ',coverage', ','));
+		}
+
+		if ($engine === CodeCoverage\Collector::EnginePcov && count($this->options['--coverage-src'])) {
 			$runner->addPhpIniOption('pcov.directory', Helpers::findCommonDirectory($this->options['--coverage-src']));
 		}
 
@@ -250,18 +279,18 @@ XX
 
 	private function finishCodeCoverage(string $file): void
 	{
-		if (!in_array($this->options['-o'], ['none', 'tap', 'junit'], true)) {
+		if (!in_array($this->stdoutFormat, ['none', 'tap', 'junit'], true)) {
 			echo 'Generating code coverage report... ';
 		}
+
 		if (filesize($file) === 0) {
-			echo 'failed. Coverage file is empty. Do you call Tester\Environment::setup() in tests?';
+			echo 'failed. Coverage file is empty. Do you call Tester\Environment::setup() in tests?' . "\n";
 			return;
 		}
-		if (pathinfo($file, PATHINFO_EXTENSION) === 'xml') {
-			$generator = new CodeCoverage\Generators\CloverXMLGenerator($file, $this->options['--coverage-src']);
-		} else {
-			$generator = new CodeCoverage\Generators\HtmlGenerator($file, $this->options['--coverage-src']);
-		}
+
+		$generator = pathinfo($file, PATHINFO_EXTENSION) === 'xml'
+			? new CodeCoverage\Generators\CloverXMLGenerator($file, $this->options['--coverage-src'])
+			: new CodeCoverage\Generators\HtmlGenerator($file, $this->options['--coverage-src']);
 		$generator->render($file);
 		echo round($generator->getCoveredPercent()) . "% covered\n";
 	}
@@ -280,6 +309,7 @@ XX
 					}
 				}
 			}
+
 			if ($state !== $prev) {
 				$prev = $state;
 				try {
@@ -287,6 +317,7 @@ XX
 				} catch (\ErrorException $e) {
 					$this->displayException($e);
 				}
+
 				echo "\n";
 				$time = time();
 			}
@@ -297,8 +328,9 @@ XX
 			} elseif ($idle >= 60) {
 				$idle = round($idle / 60) . ' min';
 			} else {
-				$idle = $idle . ' sec';
+				$idle .= ' sec';
 			}
+
 			echo 'Watching ' . implode(', ', $this->options['--watch']) . " (idle for $idle) " . str_repeat('.', ++$counter % 5) . "    \r";
 			sleep(2);
 		}
@@ -314,11 +346,15 @@ XX
 			if (($severity & error_reporting()) === $severity) {
 				throw new \ErrorException($message, 0, $severity, $file, $line);
 			}
+
 			return false;
 		});
 
 		set_exception_handler(function (\Throwable $e) {
-			$this->displayException($e);
+			if (!$e instanceof InterruptException) {
+				$this->displayException($e);
+			}
+
 			exit(2);
 		});
 	}
@@ -331,5 +367,22 @@ XX
 			? Dumper::dumpException($e)
 			: Dumper::color('white/red', 'Error: ' . $e->getMessage());
 		echo "\n";
+	}
+
+
+	private function installInterruptHandler(): void
+	{
+		if (function_exists('pcntl_signal')) {
+			pcntl_signal(SIGINT, function (): void {
+				pcntl_signal(SIGINT, SIG_DFL);
+				throw new InterruptException;
+			});
+			pcntl_async_signals(true);
+
+		} elseif (function_exists('sapi_windows_set_ctrl_handler') && PHP_SAPI === 'cli') {
+			sapi_windows_set_ctrl_handler(function (): void {
+				throw new InterruptException;
+			});
+		}
 	}
 }

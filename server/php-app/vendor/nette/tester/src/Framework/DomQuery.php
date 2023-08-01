@@ -17,7 +17,7 @@ class DomQuery extends \SimpleXMLElement
 {
 	public static function fromHtml(string $html): self
 	{
-		if (strpos($html, '<') === false) {
+		if (!str_contains($html, '<')) {
 			$html = '<body>' . $html;
 		}
 
@@ -25,11 +25,13 @@ class DomQuery extends \SimpleXMLElement
 		$html = preg_replace('#<(keygen|source|track|wbr)(?=\s|>)((?:"[^"]*"|\'[^\']*\'|[^"\'>])*+)(?<!/)>#', '<$1$2 />', $html);
 
 		// fix parsing of </ inside scripts
-		$html = preg_replace_callback('#(<script(?=\s|>)(?:"[^"]*"|\'[^\']*\'|[^"\'>])*+>)(.*?)(</script>)#s', function (array $m): string {
-			return $m[1] . str_replace('</', '<\/', $m[2]) . $m[3];
-		}, $html);
+		$html = preg_replace_callback(
+			'#(<script(?=\s|>)(?:"[^"]*"|\'[^\']*\'|[^"\'>])*+>)(.*?)(</script>)#s',
+			fn(array $m): string => $m[1] . str_replace('</', '<\/', $m[2]) . $m[3],
+			$html
+		);
 
-		$dom = new \DOMDocument();
+		$dom = new \DOMDocument;
 		$old = libxml_use_internal_errors(true);
 		libxml_clear_errors();
 		$dom->loadHTML($html);
@@ -41,13 +43,14 @@ class DomQuery extends \SimpleXMLElement
 				trigger_error(__METHOD__ . ": $error->message on line $error->line.", E_USER_WARNING);
 			}
 		}
-		return simplexml_import_dom($dom, __CLASS__);
+
+		return simplexml_import_dom($dom, self::class);
 	}
 
 
 	public static function fromXml(string $xml): self
 	{
-		return simplexml_load_string($xml, __CLASS__);
+		return simplexml_load_string($xml, self::class);
 	}
 
 
@@ -107,6 +110,7 @@ class DomQuery extends \SimpleXMLElement
 					$xpath .= "[$attr]";
 					continue;
 				}
+
 				$val = trim($m[5], '"\'');
 				if ($m[4] === '') {
 					$xpath .= "[$attr='$val']";
@@ -131,6 +135,7 @@ class DomQuery extends \SimpleXMLElement
 				$xpath .= '//*';
 			}
 		}
+
 		return $xpath;
 	}
 }

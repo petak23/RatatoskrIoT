@@ -29,14 +29,14 @@ $form->addText('query', 'Search:')
 $form->addText('count', 'Number of results:')
 	->setHtmlType('number')
 	->setDefaultValue(10)
-	->addRule($form::INTEGER, 'Must be numeric value')
-	->addRule($form::RANGE, 'Must be in range from %d to %d', [1, 100]);
+	->addRule($form::Integer, 'Must be numeric value')
+	->addRule($form::Range, 'Must be in range from %d to %d', [1, 100]);
 
 $form->addText('precision', 'Precision:')
 	->setHtmlType('range')
 	->setDefaultValue(50)
-	->addRule($form::INTEGER, 'Precision must be numeric value')
-	->addRule($form::RANGE, 'Precision must be in range from %d to %d', [0, 100]);
+	->addRule($form::Integer, 'Precision must be numeric value')
+	->addRule($form::Range, 'Precision must be in range from %d to %d', [0, 100]);
 
 $form->addEmail('email', 'Send to email:')
 	->setHtmlAttribute('autocomplete', 'off')
@@ -61,6 +61,6 @@ if ($form->isSuccess()) {
 
 <h1>Nette Forms and HTML5</h1>
 
-<?php echo $form ?>
+<?php $form->render() ?>
 
 <footer><a href="https://doc.nette.org/en/forms">see documentation</a></footer>

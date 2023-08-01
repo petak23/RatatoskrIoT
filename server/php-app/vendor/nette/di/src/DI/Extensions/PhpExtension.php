@@ -14,6 +14,7 @@ use Nette;
 
 /**
  * PHP directives definition.
+ * @deprecated  use Nette\Bootstrap\Extensions\PhpExtension
  */
 final class PhpExtension extends Nette\DI\CompilerExtension
 {
@@ -25,6 +26,7 @@ final class PhpExtension extends Nette\DI\CompilerExtension
 
 	public function loadConfiguration()
 	{
+		trigger_error(self::class . ' is deprecated, use Nette\Bootstrap\Extensions\PhpExtension.', E_USER_DEPRECATED);
 		foreach ($this->getConfig() as $name => $value) {
 			if ($value === null) {
 				continue;
@@ -44,7 +46,7 @@ final class PhpExtension extends Nette\DI\CompilerExtension
 			} elseif (function_exists('ini_set')) {
 				$this->initialization->addBody('ini_set(?, ?);', [$name, $value === false ? '0' : (string) $value]);
 
-			} elseif (ini_get($name) != $value) { // intentionally ==
+			} elseif (ini_get($name) !== (string) $value) {
 				throw new Nette\NotSupportedException('Required function ini_set() is disabled.');
 			}
 		}

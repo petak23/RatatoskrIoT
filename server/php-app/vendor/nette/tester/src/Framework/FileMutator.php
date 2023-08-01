@@ -12,10 +12,11 @@ namespace Tester;
 
 /**
  * PHP file mutator.
+ * @internal
  */
 class FileMutator
 {
-	private const PROTOCOL = 'file';
+	private const Protocol = 'file';
 
 	/** @var resource|null */
 	public $context;
@@ -24,14 +25,14 @@ class FileMutator
 	private $handle;
 
 	/** @var callable[] */
-	private static $mutators = [];
+	private static array $mutators = [];
 
 
 	public static function addMutator(callable $mutator): void
 	{
 		self::$mutators[] = $mutator;
-		stream_wrapper_unregister(self::PROTOCOL);
-		stream_wrapper_register(self::PROTOCOL, __CLASS__);
+		stream_wrapper_unregister(self::Protocol);
+		stream_wrapper_register(self::Protocol, self::class);
 	}
 
 
@@ -65,19 +66,25 @@ class FileMutator
 	public function mkdir(string $path, int $mode, int $options): bool
 	{
 		$recursive = (bool) ($options & STREAM_MKDIR_RECURSIVE);
-		return $this->native('mkdir', $path, $mode, $recursive, $this->context);
+		return $this->context
+			? $this->native('mkdir', $path, $mode, $recursive, $this->context)
+			: $this->native('mkdir', $path, $mode, $recursive);
 	}
 
 
 	public function rename(string $pathFrom, string $pathTo): bool
 	{
-		return $this->native('rename', $pathFrom, $pathTo, $this->context);
+		return $this->context
+			? $this->native('rename', $pathFrom, $pathTo, $this->context)
+			: $this->native('rename', $pathFrom, $pathTo);
 	}
 
 
 	public function rmdir(string $path, int $options): bool
 	{
-		return $this->native('rmdir', $path, $this->context);
+		return $this->context
+			? $this->native('rmdir', $path, $this->context)
+			: $this->native('rmdir', $path);
 	}
 
 
@@ -127,6 +134,7 @@ class FileMutator
 			case STREAM_META_ACCESS:
 				return $this->native('chmod', $path, $value);
 		}
+
 		return false;
 	}
 
@@ -142,6 +150,7 @@ class FileMutator
 				foreach (self::$mutators as $mutator) {
 					$content = $mutator($content);
 				}
+
 				$this->handle = tmpfile();
 				$this->native('fwrite', $this->handle, $content);
 				$this->native('fseek', $this->handle, 0);
@@ -215,10 +224,12 @@ class FileMutator
 
 	private function native(string $func)
 	{
-		stream_wrapper_restore(self::PROTOCOL);
-		$res = $func(...array_slice(func_get_args(), 1));
-		stream_wrapper_unregister(self::PROTOCOL);
-		stream_wrapper_register(self::PROTOCOL, __CLASS__);
-		return $res;
+		stream_wrapper_restore(self::Protocol);
+		try {
+			return $func(...array_slice(func_get_args(), 1));
+		} finally {
+			stream_wrapper_unregister(self::Protocol);
+			stream_wrapper_register(self::Protocol, self::class);
+		}
 	}
 }

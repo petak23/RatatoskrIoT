@@ -24,8 +24,9 @@ final class Callback
 	 * @param  string|object|callable  $callable  class, object, callable
 	 * @deprecated use Closure::fromCallable()
 	 */
-	public static function closure($callable, string $method = null): \Closure
+	public static function closure($callable, ?string $method = null): \Closure
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Closure::fromCallable().', E_USER_DEPRECATED);
 		try {
 			return \Closure::fromCallable($method === null ? $callable : [$callable, $method]);
 		} catch (\TypeError $e) {
@@ -68,12 +69,15 @@ final class Callback
 	{
 		$prev = set_error_handler(function ($severity, $message, $file) use ($onError, &$prev, $function): ?bool {
 			if ($file === __FILE__) {
-				$msg = ini_get('html_errors') ? Html::htmlToText($message) : $message;
-				$msg = preg_replace("#^$function\(.*?\): #", '', $msg);
+				$msg = ini_get('html_errors')
+					? Html::htmlToText($message)
+					: $message;
+				$msg = preg_replace("#^$function\\(.*?\\): #", '', $msg);
 				if ($onError($msg, $severity) !== false) {
 					return null;
 				}
 			}
+
 			return $prev ? $prev(...func_get_args()) : false;
 		});
 
@@ -95,11 +99,13 @@ final class Callback
 	public static function check($callable, bool $syntax = false)
 	{
 		if (!is_callable($callable, $syntax)) {
-			throw new Nette\InvalidArgumentException($syntax
+			throw new Nette\InvalidArgumentException(
+				$syntax
 				? 'Given value is not a callable type.'
 				: sprintf("Callback '%s' is not callable.", self::toString($callable))
 			);
 		}
+
 		return $callable;
 	}
 
@@ -151,23 +157,25 @@ final class Callback
 	 */
 	public static function isStatic(callable $callable): bool
 	{
-		return is_array($callable) ? is_string($callable[0]) : is_string($callable);
+		return is_string(is_array($callable) ? $callable[0] : $callable);
 	}
 
 
 	/**
 	 * Unwraps closure created by Closure::fromCallable().
+	 * @return callable|array
 	 */
-	public static function unwrap(\Closure $closure): callable
+	public static function unwrap(\Closure $closure)
 	{
 		$r = new \ReflectionFunction($closure);
+		$class = $r->getClosureScopeClass();
 		if (substr($r->name, -1) === '}') {
 			return $closure;
 
-		} elseif ($obj = $r->getClosureThis()) {
+		} elseif (($obj = $r->getClosureThis()) && $class && get_class($obj) === $class->name) {
 			return [$obj, $r->name];
 
-		} elseif ($class = $r->getClosureScopeClass()) {
+		} elseif ($class) {
 			return [$class->name, $r->name];
 
 		} else {

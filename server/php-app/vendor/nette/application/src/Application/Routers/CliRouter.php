@@ -10,17 +10,16 @@ declare(strict_types=1);
 namespace Nette\Application\Routers;
 
 use Nette;
-use Nette\Application;
 
 
 /**
  * The unidirectional router for CLI. (experimental)
  */
-final class CliRouter implements Application\IRouter
+final class CliRouter implements Nette\Routing\Router
 {
 	use Nette\SmartObject;
 
-	private const PRESENTER_KEY = 'action';
+	private const PresenterKey = 'action';
 
 	/** @var array */
 	private $defaults;
@@ -41,7 +40,7 @@ final class CliRouter implements Application\IRouter
 			return null;
 		}
 
-		$names = [self::PRESENTER_KEY];
+		$names = [self::PresenterKey];
 		$params = $this->defaults;
 		$args = $_SERVER['argv'];
 		array_shift($args);
@@ -55,6 +54,7 @@ final class CliRouter implements Application\IRouter
 				} else {
 					$params[] = $arg;
 				}
+
 				$flag = null;
 				continue;
 			}
@@ -64,24 +64,28 @@ final class CliRouter implements Application\IRouter
 				$flag = null;
 			}
 
-			if ($opt !== '') {
-				$pair = explode('=', $opt, 2);
-				if (isset($pair[1])) {
-					$params[$pair[0]] = $pair[1];
-				} else {
-					$flag = $pair[0];
-				}
+			if ($opt === '') {
+				continue;
+			}
+
+			$pair = explode('=', $opt, 2);
+			if (isset($pair[1])) {
+				$params[$pair[0]] = $pair[1];
+			} else {
+				$flag = $pair[0];
 			}
 		}
 
-		if (!isset($params[self::PRESENTER_KEY])) {
+		if (!isset($params[self::PresenterKey])) {
 			throw new Nette\InvalidStateException('Missing presenter & action in route definition.');
 		}
-		[$module, $presenter] = Nette\Application\Helpers::splitName($params[self::PRESENTER_KEY]);
+
+		[$module, $presenter] = Nette\Application\Helpers::splitName($params[self::PresenterKey]);
 		if ($module !== '') {
-			$params[self::PRESENTER_KEY] = $presenter;
+			$params[self::PresenterKey] = $presenter;
 			$presenter = $module;
 		}
+
 		$params['presenter'] = $presenter;
 
 		return $params;

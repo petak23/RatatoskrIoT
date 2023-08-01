@@ -76,7 +76,8 @@ class PhpParser
 
 			switch (is_array($token) ? $token[0] : $token) {
 				case T_NAMESPACE:
-					$namespace = ltrim(self::fetch($tokens, [T_STRING, T_NS_SEPARATOR]) . '\\', '\\');
+					$namespace = self::fetch($tokens, [T_STRING, T_NAME_QUALIFIED]);
+					$namespace = ltrim($namespace . '\\', '\\');
 					break;
 
 				case T_CLASS:
@@ -98,6 +99,7 @@ class PhpParser
 							'methods' => [],
 						];
 					}
+
 					break;
 
 				case T_PUBLIC:
@@ -127,8 +129,10 @@ class PhpParser
 								'end' => null,
 							];
 						}
+
 						$functionLevel = $level + 1;
 					}
+
 					unset($visibility, $isAbstract);
 					break;
 
@@ -147,6 +151,7 @@ class PhpParser
 						$class->end = $line;
 						unset($class);
 					}
+
 					$level--;
 					break;
 
@@ -166,7 +171,7 @@ class PhpParser
 	}
 
 
-	private static function fetch(array &$tokens, $take): ?string
+	private static function fetch(array &$tokens, array|int $take): ?string
 	{
 		$res = null;
 		while ($token = current($tokens)) {
@@ -176,8 +181,10 @@ class PhpParser
 			} elseif (!in_array($token, [T_DOC_COMMENT, T_WHITESPACE, T_COMMENT], true)) {
 				break;
 			}
+
 			next($tokens);
 		}
+
 		return $res;
 	}
 }

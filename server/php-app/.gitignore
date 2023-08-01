@@ -4,3 +4,4 @@ log/*.txt
 temp/
 vendor/
 deployment.*
+www/favicon
