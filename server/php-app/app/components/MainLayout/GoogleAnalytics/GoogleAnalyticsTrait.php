@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeterVojtech\MainLayout\GoogleAnalytics;
 
 /**
@@ -16,13 +18,13 @@ namespace PeterVojtech\MainLayout\GoogleAnalytics;
  */
 trait googleAnalyticsTrait
 {
-	/** @var IGoogleAnalyticsControl @inject */
+	/** @var GoogleAnalyticsControl @inject */
 	public $googleAnalyticsFactory;
 
 	/** 
 	 * Vytvorenie komponenty */
 	public function createComponentGoogleAnalytics(): GoogleAnalyticsControl
 	{
-		return $this->googleAnalyticsFactory->create();
+		return $this->googleAnalyticsFactory;
 	}
 }

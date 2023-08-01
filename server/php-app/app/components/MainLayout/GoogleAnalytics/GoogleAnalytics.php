@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PeterVojtech\MainLayout\GoogleAnalytics;
 
 use Nette\Application\UI\Control;
@@ -18,29 +20,24 @@ use Nette\Http\Request;
 
 class GoogleAnalyticsControl extends Control
 {
-  /** @var string|null */
-  private $udaj;
-  /** @var string */
-  private $host;
+	/** @var string|null */
+	private $udaj;
+	/** @var string */
+	private $host;
 
-  /** 
-   * @param String $ua_code 
-   * @param Nette\Http\Request $request */
-  public function __construct(?string $ua_code = null, Request $request)
-  {
-    $this->udaj = $ua_code;
-    $this->host = $request->getUrl()->host;
-  }
+	/** 
+	 * @param String|null $ua_code 
+	 * @param Nette\Http\Request $request */
+	public function __construct(?string $ua_code = null, Request $request)
+	{
+		$this->udaj = $ua_code;
+		$this->host = $request->getUrl()->host;
+	}
 
-  public function render()
-  {
-    $this->template->setFile(__DIR__ . '/GoogleAnalytics.latte');
-    $this->template->id_google_analytics = ($this->udaj != null & $this->host != "localhost") ? (strpos($this->udaj, "UA-") === 0 ? $this->udaj : false) : false;
-    $this->template->render();
-  }
-}
-
-interface IGoogleAnalyticsControl
-{
-  function create(): GoogleAnalyticsControl;
+	public function render(): void
+	{
+		$this->template->setFile(__DIR__ . '/GoogleAnalytics.latte');
+		$this->template->id_google_analytics = ($this->udaj != null & $this->host != "localhost") ? (strpos($this->udaj, "UA-") === 0 ? $this->udaj : false) : false;
+		$this->template->render();
+	}
 }
