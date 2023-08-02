@@ -10,7 +10,7 @@ use PeterVojtech;
 /**
  * Zakladny presenter pre vsetky presentery pre prihlásenie a registráciu
  * 
- * Posledna zmena(last change): 01.08.2023
+ * Posledna zmena(last change): 02.08.2023
  *
  *	Modul: FRONT
  *
@@ -18,7 +18,7 @@ use PeterVojtech;
  * @copyright Copyright (c) 2023 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link      http://petak23.echo-msz.eu
- * @version 1.0.0
+ * @version 1.0.1
  */
 abstract class BaseNotLogPresenter extends Nette\Application\UI\Presenter
 {
@@ -28,10 +28,12 @@ abstract class BaseNotLogPresenter extends Nette\Application\UI\Presenter
 
 	protected $appName;
 	protected $reg_enabled;
+	protected $links;
 
 	public function beforeRender(): void
 	{
 		$this->template->appName = $this->appName;
 		$this->template->reg_enabled = $this->reg_enabled;
+		$this->template->links = $this->links;
 	}
 }

@@ -12,7 +12,7 @@
 </head>
 <body>
 <div class="row">
-<h1 class="col-12 w-100 text-center mt-1">{$appName}</h1>
+<h1 class="col-12 w-100 text-center py-2 bg-dark bg-gradient bg-opacity-75 text-light">{$appName}</h1>
 <div class="col-12 col-md-9 mx-md-auto" n:if="count($flashes)" n:inner-foreach="$flashes as $flash">
 	{first}
 		<h2>Informace:</h2>	
@@ -22,6 +22,21 @@
 <main class="col-12 form-signin w-100 m-auto">
 {include content}
 </main>
+<footer class="py-2 bg-dark mt-auto position-fixed bottom-0 end-0">
+	<div class="container-fluid">
+		<div class="d-flex align-items-center justify-content-between small">
+			<div class="text-light small">{$appName}</div>
+			<div n:inner-foreach="$links as $link" class="small">
+				{if (strlen($link['link'])>0) }
+					<a href="{$link['link']}" target="_blank">{$link['name']}</a>
+				{else}
+					{$link['name']}
+				{/if}
+				{sep}&middot;{/sep}
+			</div>
+		</div>
+	</div>
+</footer>
 
 {block scripts}
 	<script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>

@@ -9,6 +9,15 @@ use Nette\Application\UI\Form;
 use App\Services\Logger;
 use App\Services;
 
+/**
+ * Zakladny presenter pre prihlásenie
+ * 
+ * Posledna zmena(last change): 02.08.2023
+ *
+ * @author Petr BROUZDA
+ * @author Ing. Peter VOJTECH ml.
+ * @version 1.0.1
+ */
 class SignPresenter extends BaseNotLogPresenter
 {
 	/** @persistent */
@@ -21,6 +30,7 @@ class SignPresenter extends BaseNotLogPresenter
 	{
 		$this->appName = $config->appName;
 		$this->reg_enabled = $config->reg_enabled;
+		$this->links = $config->links;
 	}
 
 	public function actionIn($username = NULL): void

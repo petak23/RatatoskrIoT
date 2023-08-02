@@ -42,18 +42,17 @@
 				<footer class="py-4 bg-light mt-auto">
 					<div class="container-fluid">
 						<div class="d-flex align-items-center justify-content-between small">
-							<div class="text-muted">RatatoskrIoT</div>
-							<div>
-								{foreach $links as $link }
-									{if (!$iterator->first) }
-										&middot;
-									{/if}
-									{if (strlen($link['link'])>0) }
-										<a href="{$link['link']}">{$link['name']}</a>
-									{else}
-										{$link['name']}
-									{/if}
-								{/foreach}
+							<div class="text-muted">{$appName} | 
+								PHP {=PHP_VERSION}&nbsp;|&nbsp;
+								{ifset $_SERVER['SERVER_SOFTWARE']}Server {$_SERVER['SERVER_SOFTWARE']}{/ifset}
+							</div>
+							<div n:inner-foreach="$links as $link">
+								{if (strlen($link['link'])>0) }
+									<a href="{$link['link']}" target="_blank">{$link['name']}</a>
+								{else}
+									{$link['name']}
+								{/if}
+								{sep}&middot;{/sep}
 							</div>
 						</div>
 					</div>
@@ -66,16 +65,6 @@
 			<script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 			<script src="../../../../js/scripts.js"></script>
-
-{*<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-289403-4");
-pageTracker._trackPageview();
-} catch(err) {}</script>*}
 	
 		{control googleAnalytics}
 	
