@@ -8,15 +8,15 @@ use Nette;
  * Hlavna trieda pre podporu jazykov pre presentre.
  *  
  * Môže spolupracovať s DB tabuľkou (meno tabuľky je ako parameter), v ktorej testuje existenciu daného jazyka.
- * Alebo je zoznam povolených jazykov uvedený v konfigurácii.
+ * Alebo je zoznam povolených jazykov uvedený v konfigurácii(allowed_langs).
  * 
- * Posledna zmena(last change): 20.04.2023
+ * Posledna zmena(last change): 15.08.2023
  * 
  * @author Ing. Peter VOJTECH ml. <petak23@gmail.com>
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.2.4
+ * @version 1.2.5
  *
  * @property-read string $jazyk Skratka aktualneho jazyka
  * @property-read int $language_id Id aktualneho jazyka
@@ -40,7 +40,7 @@ class LanguageMain implements Nette\Localization\Translator
 
   public function __construct(?array $params, Nette\Database\Explorer $db)
   {
-    if (isset($params['db_table'])) {
+    if (isset($params['db_table']) && $params['db_table'] != null) {
       $this->lang = $db->table($params['db_table'])->fetchPairs('id', 'acronym');
     } elseif (isset($params['allowed_langs'])) {
       $this->lang = $params['allowed_langs'];

@@ -2,11 +2,11 @@
 
 {block content}
 
-<h1 n:block=title>Přihlášení</h1>
+<h1 n:block=title>{_'SignInForm_h2'}</h1>
 
 {control signInForm}
 
 <p class="text-end" n:if="$reg_enabled">
-	Nemáte účet?
-	<a class="ms-1" n:href="Enroll:Step1">Zaregistrujte se</a>.
+	{_'SignInForm_register_1'}
+	<a class="ms-1" n:href="Enroll:Step1">{_'SignInForm_register_2'}</a>.
 </p>

@@ -1,9 +1,4 @@
 #
-# SECURITY WARNING: it is CRITICAL that this file & directory are NOT accessible directly via a web browser!
-#
-# If you don't protect this directory from direct web access, anybody will be able to see your passwords.
-# http://nette.org/security-warning
-#
 # Last change 21.04.2020
 #
 base_lang_not_def: 'Language you require is not defined for this site!'

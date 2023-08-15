@@ -2,6 +2,17 @@ parameters:
 	font: 'LiberationMono-Regular.ttf'
 	fontBold: 'LiberationMono-Bold.ttf'
 
+
+	language_support:
+		# Jazykové mutácie stránky. Použi nastavenie allowed_langs alebo langs_db_table. 
+		# V prípade použitia oboch má prednosť langs_db_table
+		allowed_langs: # Povolené jazykové mutácie
+			1: sk
+			2: cz
+		# Názov DB tabuľky, v ktorej je zoznam povolených jazykových mutácií
+		#	Musi obsahovat polia: 'id' a 'acronym'(skratka)
+		#langs_db_table: 'lang' # null # 
+
 application:
 	errorPresenter: Error
 	mapping:
@@ -25,6 +36,7 @@ services:
 	- App\Services\InventoryDataSource
 	- PeterVojtech\MainLayout\Favicon\IFaviconControl
 	- PeterVojtech\MainLayout\GoogleAnalytics\GoogleAnalyticsControl( %ua_code% )
+	- Language_support\LanguageMain(%language_support%)
 	security.passwords: Nette\Security\Passwords(::PASSWORD_BCRYPT, [cost: 11])		# zde se nastavuji pozadovane parametry hesla https://doc.nette.org/cs/3.0/passwords
 	router: App\Router\RouterFactory::createRouter
 	authenticator: App\Services\RaAuthenticator

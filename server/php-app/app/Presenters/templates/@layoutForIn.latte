@@ -15,7 +15,7 @@
 <h1 class="col-12 w-100 text-center py-2 bg-dark bg-gradient bg-opacity-75 text-light">{$appName}</h1>
 <div class="col-12 col-md-9 mx-md-auto" n:if="count($flashes)" n:inner-foreach="$flashes as $flash">
 	{first}
-		<h2>Informace:</h2>	
+		<h2>{_'base_info'}:</h2>	
 	{/first}
 	<div class="alert flash alert-{$flash->type} {$flash->type}"><b>{$flash->message}</b></div>
 </div>
@@ -40,15 +40,7 @@
 
 {block scripts}
 	<script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>
-	{*<script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-	<script src="../www/js/scripts.js"></script>
-	<script type="text/javascript">
-	$(function () {
-		$('[data-toggle="tooltip"]').tooltip()
-	})
-	</script>*}
-
+	
 	{control googleAnalytics}
 	
 {/block}

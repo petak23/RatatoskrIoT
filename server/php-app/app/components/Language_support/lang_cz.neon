@@ -1,10 +1,5 @@
 #
-# SECURITY WARNING: it is CRITICAL that this file & directory are NOT accessible directly via a web browser!
-#
-# If you don't protect this directory from direct web access, anybody will be able to see your passwords.
-# http:#nette.org/security-warning
-#
-# Last change 24.08.2021
+# Last change 15.08.2023
 #
 
 # Nette forms...
@@ -115,6 +110,7 @@ base_description: 'Popis' #ok
 base_size: 'Velikost' #ok
 base_time: 'Čas'  #ok
 base_file_type: 'Typ souboru' #ok
+base_info: 'Informace' #ok
 
 # --- RegisterForm ---
 RegisterForm_h2: 'Registrácia'
@@ -165,24 +161,28 @@ Enroll2Form_validate_er_code: 'Chybný e-mail alebo kód.'
 Enroll2Form_validate_ok: 'Aktivácia ukončená, môžete se prihlásiť.'
 
 # --- SignInForm ---
-SignInForm_h2: 'Prihlásenie'
-SignInForm_email: 'Email:'
-SignInForm_email_ph: '@'
-SignInForm_email_ar: 'Zadajte, prosím, platnú e-mailovú adresu (napr. moj@mail.sk).'
-SignInForm_email_sr: 'Uveďte, prosím, užívateľský email.'
-SignInForm_password: 'Heslo:'
-SignInForm_password_min_lenght: 'Heslo musí mať aspoň %d znaky...'
-SignInForm_password_req: 'Uveďte, prosím, heslo.'
-SignInForm_remember: ' Pamätať si ma'
-SignInForm_login: 'Prihlásiť sa...'
+SignInForm_h2: 'Přihlášení' #ok
+SignInForm_username: 'Uživatelské jméno:' #ok
+SignInForm_username_sr: 'Prosím vyplňte své uživatelské jméno.' #ok
+SignInForm_username_min_lenght: 'Uživatelské jméno musí mít nejmíň %d zanky...' #ok
+SignInForm_email: 'Email:' #ok
+SignInForm_email_ph: '@' #ok
+SignInForm_email_ar: 'Zadejte, prosím, platnú e-mailovú adresu (napr. muj@mail.cz).' #ok
+SignInForm_email_sr: 'Prosím vyplňte uživatelský email.' #ok
+SignInForm_password: 'Heslo:'	#ok
+SignInForm_password_min_lenght: 'Heslo musí mít nejmíň %d znakú...' #ok
+SignInForm_password_req: 'Prosím vyplňte své heslo.' #ok
+SignInForm_remember: ' Pametat si mne' #ok ???
+SignInForm_login: 'Přihlásit se...' #ok
 SignInForm_forgottenPassword: 'Zabudnuté heslo?'
-SignInForm_register: 'Nemáte účet? Zaregistrujte se.'
-SignInForm_login_ok: 'Vítajte! Úspešne ste sa prihlásili!'
-SignInForm_main_error: 'Prihlásenie sa nepodarilo! Skúste neskôr znovu... Možná príčina je: %s'
+SignInForm_register_1: 'Nemáte účet?'	#ok
+SignInForm_register_2: 'Zaregistrujte se.' #ok
+SignInForm_login_ok: 'Vítejte! Úspešně ste se přihlásili!' #ok ???
+SignInForm_main_error: 'Přihlášení se nezdařilo! Skúste neskôr znovu... Možná príčina je: %s'
 #validateSignInForm
 AuthenticationException_1: 'Uživatel nebyl nalezen.' #ok
-AuthenticationException_2: 'Chybný prihlasovací email alebo heslo.'
-AuthenticationException_3: 'Iná chyba prihlásenia.'
+AuthenticationException_2: 'Chybný přihlasovací email alebo heslo.'
+AuthenticationException_3: 'Iná chyba přihlášení.'
 AuthenticationException_4: 'Účet nie je schválený.'
 AuthenticationException_5: 'Tento účet bol správcom systému uzamknutý.'
 AuthenticationException_6: 'Tento účet je dočasne uzamknutý, zkúste to znovu za %s sekúnd.'

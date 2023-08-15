@@ -45,14 +45,17 @@ class SignPresenter extends BaseNotLogPresenter
 	protected function createComponentSignInForm(): Form
 	{
 		$form = new Form;
-		$form->addText('username', 'Uživatelské jméno:')
-			->setRequired('Prosím vyplňte své uživatelské jméno.')
+		$form->setTranslator($this->texty_presentera);
+		$form->addText('username', 'SignInForm_username')
+			->setRequired('SignInForm_username_sr')
+			->addRule($form::MIN_LENGTH, 'SignInForm_username_min_lenght', 2)
 			->setDefaultValue($this->username);
 
-		$form->addPassword('password', 'Heslo:')
-			->setRequired('Prosím vyplňte své heslo.');
+		$form->addPassword('password', 'SignInForm_password')
+			->addRule($form::MIN_LENGTH, 'SignInForm_password_min_lenght', 5)
+			->setRequired('SignInForm_password_req');
 
-		$form->addSubmit('send', 'Přihlásit')
+		$form->addSubmit('send', 'SignInForm_login')
 			->setHtmlAttribute('class', 'btn btn-success')
 			->setHtmlAttribute('onclick', 'if( Nette.validateForm(this.form) ) { this.form.submit(); this.disabled=true; } return false;');
 
@@ -74,9 +77,9 @@ class SignPresenter extends BaseNotLogPresenter
 
 			$this->redirect('Inventory:user');
 		} catch (Nette\Security\AuthenticationException $e) {
-			$form->addError("Přihlášení se nepodařilo: {$e->getMessage()}");
+			$form->addError(sprintf($this->texty_presentera->translate('SignInForm_main_error'), $e->getMessage()));
 		} catch (\App\Exceptions\UserNotEnrolledException $e) {
-			$this->flashMessage("Nejprve aktivujte účet zadáním kódu z e-mailu.");
+			$this->flashMessage($this->texty_presentera->translate('UserNotEnrolledException'));
 			$this->redirect("Enroll:step2", $values->username);
 		}
 	}
