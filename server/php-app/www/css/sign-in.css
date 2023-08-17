@@ -14,6 +14,7 @@ body {
 }
 .form-signin input {
 	width: 100%;
+	border-color: #aaa;
 }
 .form-signin input[type="email"] {
 	margin-bottom: .25rem;
@@ -31,6 +32,13 @@ body {
 	padding-left: .25rem;
 	padding-right: .25rem;
 }
+.form-signin .form-check-label {
+	width: 100%;
+}
+.form-signin .form-check-input {
+	width: 1rem !important;
+}
+
 
 @media (min-width: 576px) {
 	.form-signin {

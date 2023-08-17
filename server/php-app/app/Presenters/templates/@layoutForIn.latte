@@ -17,7 +17,7 @@
 	{first}
 		<h2>{_'base_info'}:</h2>	
 	{/first}
-	<div class="alert flash alert-{$flash->type} {$flash->type}"><b>{$flash->message}</b></div>
+	<div class="alert flash alert-{$flash->type} {$flash->type}"><b>{_$flash->message}</b></div>
 </div>
 <main class="col-12 form-signin w-100 m-auto">
 {include content}
@@ -39,7 +39,8 @@
 </footer>
 
 {block scripts}
-	<script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>
+	{*<script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>*}
+	<script src="{$basePath}/www/js/netteForms.min.js"></script>
 	
 	{control googleAnalytics}
 	

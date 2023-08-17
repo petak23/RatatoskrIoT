@@ -31,7 +31,7 @@ base_nie_je_opravnenie: 'Na požadovanú akciu %s nemáte dostatočné oprávnen
 base_nie_je_opravnenie1: 'Nemáte dostatočné oprávnenie na danú operáciu!'
 base_loged_in_bad: 'Daná akcia je určená pre neprihláseného užívateľa!'
 base_internal_error: 'Je nám ľúto, ale došlo k vnútornej chybe! Prosím skúste úpredošlú operáciu neskôr znovu...'
-base_log_out_mess: 'Boli ste úspešne odhlásený...'
+base_log_out_mess: 'Odhlášení bylo úspěšné.' #ok
 base_nette_title: 'Nette Framework - populárny nástroj pre vytváranie webových aplikácií v PHP.'
 base_nette_powered: 'vytvorené v nette'
 base_link_to_admin_log_in: 'Prihlásenie pre administráciu webu'
