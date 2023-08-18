@@ -118,7 +118,7 @@
 
     <div class="row my-2 px-2 bg-primary text-white">
         <div class="col-4 col-md-2 "><b>{$device->attrs['name']}</b>
-            {if ($device->attrs['problem_mark'])} 
+            {if ($device->problem_mark)} {* if ($device->attrs['problem_mark']) *} 
                 <a href="#" data-toggle="tooltip" data-placement="top" title="Zařízení má problém s přihlášením. Poslední neúspěšné přihlášení: 
                 {$device->attrs['last_bad_login']}."
                 ><i class="text-warning fas fa-exclamation-triangle"></i></a>

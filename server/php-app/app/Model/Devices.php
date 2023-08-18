@@ -6,8 +6,6 @@ namespace App\Model;
 
 use Nette;
 
-use \App\Model\Device;
-
 class Devices
 {
     use Nette\SmartObject;
@@ -16,15 +14,15 @@ class Devices
     
     public function __construct()
     {
-        $this->devices = array();
+        $this->devices = [];
     }
 
-    public function add( Device $device )
+    public function add( Model\Device $device ): void
     {
         $this->devices[ $device->attrs['id'] ] = $device;
     }
 
-    public function get( $id ) : Device
+    public function get( int $id ) : Model\Device
     {
         return $this->devices[$id];
     }
