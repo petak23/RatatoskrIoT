@@ -15,13 +15,13 @@ use Nette\Utils\Random;
 /**
  * Model, ktory sa stara o tabulku user_main
  * 
- * Posledna zmena 09.06.2023
+ * Posledna zmena 22.08.2023
  * 
  * @author     Ing. Peter VOJTECH ml. <petak23@gmail.com>
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version    1.0.7
+ * @version    1.0.8
  */
 class PV_User_main
 {
@@ -59,7 +59,7 @@ class PV_User_main
 	 * @return Table\Selection */
 	public function getUsers(): Table\Selection
 	{
-		return $this->dbtable()->order('username ASC');
+		return $this->dbtable()->order('email ASC');
 	}
 
 	/**
@@ -122,7 +122,6 @@ class PV_User_main
 		}
 
 		return $this->dbtable()->insert([
-			'username'            => $values->email,
 			'phash'               => $hash,
 			'id_user_roles'       => 2, // Registrácia cez web
 			'email'               => $values->email,

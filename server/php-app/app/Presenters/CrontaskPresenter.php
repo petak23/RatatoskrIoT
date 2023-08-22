@@ -705,8 +705,8 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 	{
 		$users = $this->datasource->getAllUserSettings();
 		foreach ($users as $user) {
-			//  id, username, measures_retention, sumdata_retention, blob_retention
-			$logger->write(Logger::INFO, "#{$user['id']} {$user['username']} measures:{$user['measures_retention']} sumdata:{$user['sumdata_retention']} blobs:{$user['blob_retention']}");
+			//  id, email, measures_retention, sumdata_retention, blob_retention
+			$logger->write(Logger::INFO, "#{$user['id']} {$user['email']} measures:{$user['measures_retention']} sumdata:{$user['sumdata_retention']} blobs:{$user['blob_retention']}");
 			// per-uzivatel
 			$sensors = $this->datasource->getSensorIdsForUser($user['id']);
 			if (count($sensors) > 0) {
@@ -754,9 +754,9 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 
 		$logger->write(Logger::INFO, 'Deleting base logs older than ' . self::LOG_RETENTION_BASE . ' days:');
 		foreach (Finder::findFiles('*.txt', '*.html')
-				->exclude('audit*')
-				->date('<', '- ' . self::LOG_RETENTION_BASE . ' days')
-				->in($dir)
+			->exclude('audit*')
+			->date('<', '- ' . self::LOG_RETENTION_BASE . ' days')
+			->in($dir)
 			as $key => $file) {
 			$logger->write(Logger::DEBUG, "  {$file->getPathname()}");
 			FileSystem::delete($file->getPathname());
@@ -764,8 +764,8 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 
 		$logger->write(Logger::INFO, 'Deleting audit logs older than ' . self::LOG_RETENTION_AUDIT . ' days:');
 		foreach (Finder::findFiles('audit*.txt')
-				->date('<', '- ' . self::LOG_RETENTION_AUDIT . ' days')
-				->in($dir)
+			->date('<', '- ' . self::LOG_RETENTION_AUDIT . ' days')
+			->in($dir)
 			as $key => $file) {
 			$logger->write(Logger::DEBUG, "  {$file->getPathname()}");
 			FileSystem::delete($file->getPathname());

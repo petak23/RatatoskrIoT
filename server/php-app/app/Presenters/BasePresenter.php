@@ -42,7 +42,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
 			Logger::log(
 				'audit',
 				Logger::ERROR,
-				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel #{$this->getUser()->id} {$this->getUser()->getIdentity()->username} zkusil pouzit funkci vyzadujici roli {$reqRole}"
+				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel #{$this->getUser()->id} {$this->getUser()->getIdentity()->email} zkusil pouzit funkci vyzadujici roli {$reqRole}"
 			);
 
 			$response = $this->getHttpResponse();

@@ -22,17 +22,15 @@ class Device
 	public $sensors = [];
 
 	/** @var bool Príznak problému */
-  public $problem_mark = false;
+	public $problem_mark = false;
 
-	public function __construct( $attrs )
+	public function __construct($attrs)
 	{
 		$this->attrs = $attrs;
 	}
-	
-	public function addSensor( array $sensorAttrs ): void
-	{
-		$this->sensors[ $sensorAttrs['id'] ] = $sensorAttrs;
-	}
 
-	
+	public function addSensor(Nette\Database\Row $sensorAttrs): void
+	{
+		$this->sensors[$sensorAttrs['id']] = $sensorAttrs;
+	}
 }

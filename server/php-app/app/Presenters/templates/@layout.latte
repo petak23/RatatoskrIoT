@@ -21,10 +21,9 @@
 					<div class="sb-sidenav-menu">
 						<div class="nav">
 							<div class="sb-sidenav-menu-heading">Výběr sestavy</div>
-							{foreach $menu as $row}
-								<a class="nav-link pt-0 pb-1 {if ($row->id==$id)}active{/if}" href="../../{$token}/{$row->id}/?dateFrom={$dateFrom}&lenDays={$lenDays}&altYear={$altYear}">{$row->name}</a>
+							{foreach $menu as $m}
+								<a n:class="nav-link, pt-0, pb-1, $m->id==$id ? active" href="../../{$token}/{$m->id}/?dateFrom={$dateFrom}&lenDays={$lenDays}&altYear={$altYear}">{$m->name}</a>
 							{/foreach}
-
 							<div>&nbsp;</div>
 						</div>
 					</div>
