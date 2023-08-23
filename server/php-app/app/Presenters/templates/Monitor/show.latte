@@ -7,31 +7,31 @@
 </div>
 
 {if (sizeof($devices->devices)==0)}
-    <div class="row px-2 ">
-        Zatím nemáte žádná zařízení.
-    </div>
+	<div class="row px-2 ">
+		Zatím nemáte žádná zařízení.
+	</div>
 {/if}
 
 {foreach $devices->devices as $device }
 
-    {foreach $device->sensors as $sensor }
-        
-        {if ($sensor['warningIcon']>0)} 
-            <p>
-            <b><a n:href="Sensor:show $sensor['id']" >{$device->attrs['name']}:{$sensor['name']}</a></b> - 
-            Senzor nedodává data. Poslední data: {$sensor['last_data_time']}.
-            {if ($sensor['warningIcon']==1)}
-                (monitoring ZAPNUTÝ)
-                {var $isError = true}
-            {else}
-                (monitoring vypnutý)
-                {var $isWarn = true}
-            {/if} 
-            </p>
-        {/if}
+	{foreach $device->sensors as $sensor }
+		
+		{if ($sensor['warningIcon']>0)} 
+			<p>
+			<b><a n:href="Sensor:show $sensor['id']" >{$device->attrs['name']}:{$sensor['name']}</a></b> - 
+			Senzor nedodává data. Poslední data: {$sensor['last_data_time']}.
+			{if ($sensor['warningIcon']==1)}
+				(monitoring ZAPNUTÝ)
+				{var $isError = true}
+			{else}
+				(monitoring vypnutý)
+				{var $isWarn = true}
+			{/if} 
+			</p>
+		{/if}
 
-    {/foreach}
-    
+	{/foreach}
+	
 {/foreach}
 
 <p>
@@ -41,11 +41,11 @@
 
 Status:
 {if ($isError)} 
-    <font color="red">MONITORING_ERROR</font>
+	<font color="red">MONITORING_ERROR</font>
 {elseif ($isWarn)}
-    <font color="blue">MONITORING_WARN</font>
+	<font color="blue">MONITORING_WARN</font>
 {else}
-    <font color="green">MONITORING_OK</font>
+	<font color="green">MONITORING_OK</font>
 {/if}
 
 {/define}
