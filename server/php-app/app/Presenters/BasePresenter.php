@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
-use Nette;
-use Tracy\Debugger;
 use App\Services\Logger;
+use Language_support;
+use Nette;
 use PeterVojtech;
+use Tracy\Debugger;
 
 class BasePresenter extends Nette\Application\UI\Presenter
 {
@@ -15,19 +16,44 @@ class BasePresenter extends Nette\Application\UI\Presenter
 	use PeterVojtech\MainLayout\Favicon\faviconTrait;
 	use PeterVojtech\MainLayout\GoogleAnalytics\googleAnalyticsTrait;
 
+	/** @var Language_support\LanguageMain */
+	public $texty_presentera;
+
+	/** @var string Skratka aktualneho jazyka 
+	 * @persistent */
+	public $language = 'sk';
+
+	public function injectTexty_presentera(Language_support\LanguageMain $texty_presentera)
+	{
+		$this->texty_presentera = $texty_presentera;
+	}
+
+	protected function startup()
+	{
+		parent::startup();
+
+		//Nastavenie textov podla jazyka 
+		$this->texty_presentera->setLanguage($this->language);
+	}
+
+	public function beforeRender(): void
+	{
+		$this->template->setTranslator($this->texty_presentera);
+	}
+
 	public function checkUserRole($reqRole)
 	{
 		if (!$this->getUser()->loggedIn) {
 			Logger::log(
 				'webapp',
 				Logger::ERROR,
-				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel je neprihlaseny, jdeme na login."
+				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: " . $this->texty_presentera->translate('log_base_not_logged_in')
 			);
 
 			if ($this->getUser()->logoutReason === Nette\Security\IUserStorage::INACTIVITY) {
-				$this->flashMessage('Dlouho jste neudělal/a žádnou akci, z bezpečnostních důvodů došlo k odhlášení. Přihlašte se prosím znovu.');
+				$this->flashMessage('base_long_inactivity');
 			} else {
-				$this->flashMessage('Pro využití této funkce se nejprve přihlašte.');
+				$this->flashMessage('base_not_logged_now');
 			}
 
 			$response = $this->getHttpResponse();

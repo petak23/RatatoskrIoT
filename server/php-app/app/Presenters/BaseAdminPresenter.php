@@ -5,28 +5,12 @@ declare(strict_types=1);
 namespace App\Presenters;
 
 use	App\Services\Logger;
-use Language_support;
 use Nette;
 use Nette\Application\UI\Form;
 
 class BaseAdminPresenter extends BasePresenter
 {
 	use Nette\SmartObject;
-
-	/** @var Language_support\LanguageMain @inject */
-	public $texty_presentera;
-
-	/** @var string Skratka aktualneho jazyka 
-	 * @persistent */
-	public $language = 'sk';
-
-	protected function startup()
-	{
-		parent::startup();
-
-		//Nastavenie textov podla jazyka 
-		$this->texty_presentera->setLanguage($this->language);
-	}
 
 	public function checkAcces($deviceUserId, $type = "zařízení")
 	{
@@ -53,11 +37,6 @@ class BaseAdminPresenter extends BasePresenter
 		$this->template->path = "";
 
 		$this->populateMenu($activeItem, $submenuAfterItem, $submenu);
-	}
-
-	public function beforeRender(): void
-	{
-		$this->template->setTranslator($this->texty_presentera);
 	}
 
 
