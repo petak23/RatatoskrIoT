@@ -15,7 +15,7 @@ use Tracy\Debugger;
  * 
  * Posledna zmena(last change): 25.08.2023
  *
- * @author Petr Brouzda
+ * @author Petr BROUZDA
  * @author Ing. Peter VOJTECH ml.
  * 
  * @github Forked from petrbrouzda/RatatoskrIoT
@@ -40,7 +40,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
 		$this->texty_presentera = $texty_presentera;
 	}
 
-	protected function startup()
+	protected function startup(): void
 	{
 		parent::startup();
 
@@ -53,7 +53,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
 		$this->template->setTranslator($this->texty_presentera);
 	}
 
-	public function checkUserRole($reqRole)
+	public function checkUserRole(string $reqRole): void
 	{
 		if (!$this->getUser()->loggedIn) {
 			Logger::log(
@@ -80,20 +80,20 @@ class BasePresenter extends Nette\Application\UI\Presenter
 			Logger::log(
 				'audit',
 				Logger::ERROR,
-				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel #{$this->getUser()->id} {$this->getUser()->getIdentity()->email} zkusil pouzit funkci vyzadujici roli {$reqRole}"
+				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: " 
+				. sprintf($this->texty_presentera->translate('log_base_user_use'), $this->getUser()->id, $this->getUser()->getIdentity()->email, $reqRole)
 			);
 
 			$response = $this->getHttpResponse();
 			$response->setHeader('Cache-Control', 'no-cache');
 			$response->setExpiration('1 sec');
 
-			$this->getUser()->logout();
-			$this->flashMessage('Vaše úroveň oprávnění nestačí k použití této funkce!');
-			$this->redirect('Sign:in');
+			$this->getUser()->logout(true);
+			$this->flashRedirect('Sign:in', 'base_nie_je_opravnenie2', 'warning');
 		}
 	}
 
-	private function addMenuItem(array $vals, $submenuAfterItem = FALSE, $submenu = NULL)
+	private function addMenuItem(array $vals, int|bool $submenuAfterItem = false, ?array $submenu = null): void
 	{
 		$this->template->menu[] = $vals;
 		if ($vals['id'] == $submenuAfterItem) {
@@ -103,36 +103,36 @@ class BasePresenter extends Nette\Application\UI\Presenter
 		}
 	}
 
-	public function populateMenu($activeItem, $submenuAfterItem = FALSE, $submenu = NULL)
+	public function populateMenu(int $activeItem, int|bool $submenuAfterItem = false, ?array $submenu = null): void
 	{
 		$this->template->menu = [];
 
 		$this->addMenuItem(
-			['id' => '3', 'link' => 'inventory/user', 'name' => 'Můj účet'],
+			['id' => '3', 'link' => 'inventory/user', 'name' => $this->texty_presentera->translate('menu_3')],
 			$submenuAfterItem,
 			$submenu
 		);
 
 		if ($this->getUser()->isInRole('admin')) {
 			$this->addMenuItem(
-				['id' => '6', 'link' => 'user/list', 'name' => 'Uživatelé'],
+				['id' => '6', 'link' => 'user/list', 'name' => $this->texty_presentera->translate('menu_6')],
 				$submenuAfterItem,
 				$submenu
 			);
 		}
 
 		$this->addMenuItem(
-			['id' => '1', 'link' => 'inventory/home', 'name' => 'Zařízení'],
+			['id' => '1', 'link' => 'inventory/home', 'name' => $this->texty_presentera->translate('menu_1')],
 			$submenuAfterItem,
 			$submenu
 		);
 		$this->addMenuItem(
-			['id' => '2', 'link' => 'view/views', 'name' => 'Grafy'],
+			['id' => '2', 'link' => 'view/views', 'name' => $this->texty_presentera->translate('menu_2')],
 			$submenuAfterItem,
 			$submenu
 		);
 		$this->addMenuItem(
-			['id' => '5', 'link' => 'inventory/units', 'name' => 'Kódy jednotek'],
+			['id' => '5', 'link' => 'inventory/units', 'name' => $this->texty_presentera->translate('menu_5')],
 			$submenuAfterItem,
 			$submenu
 		);
