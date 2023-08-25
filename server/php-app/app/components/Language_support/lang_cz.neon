@@ -113,6 +113,7 @@ base_size: 'Velikost' #ok
 base_time: 'Čas'  #ok
 base_file_type: 'Typ souboru' #ok
 base_info: 'Informace' #ok
+base_not_rights: 'K tomuto %s nemáte práva!' #ok
 
 # --- RegisterForm ---
 RegisterForm_h2: 'Registrácia'
@@ -502,6 +503,7 @@ device_form_del_ok: 'Zařízení smazáno.'
 graphs_h1: 'Grafy'
 
 # Logs
+log_base_not_allowed: 'Uzivatel #%d %s zkusil editovat %s patrici uzivateli #%d'
 log_device_edit: 'Uzivatel #%s %s edituje/prohlizi konfiguraci/heslo zarizeni %s'
 log_device_edit_not_aut: 'Uzivatel #%s (%s) zkusil editovat zařízení patrici uzivateli #%s'
 log_device_view: 'Uzivatel #%s %s prohlizi konfiguraci/heslo zarizeni %s'

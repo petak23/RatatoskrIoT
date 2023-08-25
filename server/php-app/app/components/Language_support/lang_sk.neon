@@ -113,6 +113,7 @@ base_size: 'Veľkosť'
 base_time: 'Čas'
 base_file_type: 'Typ súboru'
 base_info: 'Informácie'
+base_not_rights: 'K tomuto %s nemáte práva!'
 
 # --- RegisterForm ---
 RegisterForm_h2: 'Registrácia'
@@ -502,6 +503,7 @@ device_form_del_ok: 'Zariadenie bolo zmazané.'
 graphs_h1: 'Grafy'
 
 # Logs
+log_base_not_allowed: 'Užívateľ #%d %s zkúsil editovať %s patriacu užívateľovi #%d'
 log_device_edit: 'Užívateľ #%s (%s) edituje/prezerá konfiguráciu/heslo zariadenia s id: %s'
 log_device_edit_not_aut: 'Užívateľ #%s (%s) zkúsil editovať zariadenie patriace užívateľovi #%s'
 log_device_view: 'Užívateľ #%s (%s) prezerá konfiguráciu/heslo zariadenia s id: %s'

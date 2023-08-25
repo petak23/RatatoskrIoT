@@ -11,6 +11,18 @@ use App\Model;
 use App\Services\Logger;
 use App\Services;
 
+/**
+ * Presenter pre správu užívateľov
+ * 
+ * Posledna zmena(last change): 25.08.2023
+ *
+ * @author Petr Brouzda
+ * @author Ing. Peter VOJTECH ml.
+ * 
+ * @github Forked from petrbrouzda/RatatoskrIoT
+ * 
+ * @version 1.0.1
+ */
 final class UserPresenter extends BaseAdminPresenter
 {
 	use Nette\SmartObject;
@@ -52,8 +64,6 @@ final class UserPresenter extends BaseAdminPresenter
 	{
 		$this->checkUserRole('admin');
 		$this->populateTemplate(6);
-		$this->template->appName = $this->appName;
-		$this->template->links = $this->links;
 		$this->template->path = '';
 		$this->template->users = $this->datasource->getUsers();
 	}
@@ -62,8 +72,6 @@ final class UserPresenter extends BaseAdminPresenter
 	{
 		$this->checkUserRole('admin');
 		$this->populateTemplate(6);
-		$this->template->appName = $this->appName;
-		$this->template->links = $this->links;
 		$this->template->path = '../';
 		$this->template->userData = $this->datasource->getUser($id);
 		$this->template->devices = $this->devices->getDevicesUser($id);
@@ -74,8 +82,6 @@ final class UserPresenter extends BaseAdminPresenter
 	{
 		$this->checkUserRole('admin');
 		$this->populateTemplate(6);
-		$this->template->appName = $this->appName;
-		$this->template->links = $this->links;
 		$this->template->path = '';
 	}
 
@@ -83,8 +89,6 @@ final class UserPresenter extends BaseAdminPresenter
 	{
 		$this->checkUserRole('admin');
 		$this->populateTemplate(6);
-		$this->template->appName = $this->appName;
-		$this->template->links = $this->links;
 		$this->template->path = '../';
 		$this->template->id = $id;
 
@@ -227,8 +231,6 @@ final class UserPresenter extends BaseAdminPresenter
 	{
 		$this->checkUserRole('admin');
 		$this->populateTemplate(6);
-		$this->template->appName = $this->appName;
-		$this->template->links = $this->links;
 		$this->template->path = '../';
 		$this->template->id = $id;
 

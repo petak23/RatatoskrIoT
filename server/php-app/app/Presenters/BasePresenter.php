@@ -10,6 +10,18 @@ use Nette;
 use PeterVojtech;
 use Tracy\Debugger;
 
+/**
+ * Zakladny presenter
+ * 
+ * Posledna zmena(last change): 25.08.2023
+ *
+ * @author Petr Brouzda
+ * @author Ing. Peter VOJTECH ml.
+ * 
+ * @github Forked from petrbrouzda/RatatoskrIoT
+ * 
+ * @version 1.0.7
+ */
 class BasePresenter extends Nette\Application\UI\Presenter
 {
 	use Nette\SmartObject;
@@ -81,7 +93,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
 		}
 	}
 
-	private function addMenuItem($vals, $submenuAfterItem = FALSE, $submenu = NULL)
+	private function addMenuItem(array $vals, $submenuAfterItem = FALSE, $submenu = NULL)
 	{
 		$this->template->menu[] = $vals;
 		if ($vals['id'] == $submenuAfterItem) {
@@ -93,7 +105,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
 
 	public function populateMenu($activeItem, $submenuAfterItem = FALSE, $submenu = NULL)
 	{
-		$this->template->menu = array();
+		$this->template->menu = [];
 
 		$this->addMenuItem(
 			['id' => '3', 'link' => 'inventory/user', 'name' => 'Můj účet'],
@@ -131,4 +143,37 @@ class BasePresenter extends Nette\Application\UI\Presenter
 		$response->setHeader('Cache-Control', 'no-cache');
 		$response->setExpiration('1 sec');
 	}
+
+	/** Funkcia pre zjednodusenie vypisu flash spravy a presmerovania
+   * @param array|string $redirect Adresa presmerovania
+   * @param string $text Text pre vypis hlasenia
+   * @param string $druh - druh hlasenia */
+  public function flashRedirect(array|string $redirect, string $text = "", string $druh = "info"): void
+  {
+    $this->flashMessage($text, $druh);
+    if (is_array($redirect)) {
+      if (count($redirect) > 1) {
+        if (!$this->isAjax()) {
+          $this->redirect($redirect[0], $redirect[1]);
+        } else {
+          $this->redrawControl();
+        }
+      } elseif (count($redirect) == 1) {
+        $this->redirect($redirect[0]);
+      } else {
+				Logger::log(
+					'audit',
+					Logger::ERROR,
+					"[flashRedirect] Invalid redirect for text: {$text}"
+				);
+				dumpe("[flashRedirect] Invalid redirect", $redirect, $text);
+			}
+    } else {
+      if (!$this->isAjax()) {
+        $this->redirect($redirect);
+      } else {
+        $this->redrawControl();
+      }
+    }
+  }
 }

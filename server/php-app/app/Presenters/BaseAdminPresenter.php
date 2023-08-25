@@ -12,33 +12,39 @@ class BaseAdminPresenter extends BasePresenter
 {
 	use Nette\SmartObject;
 
-	public function checkAcces($deviceUserId, $type = "zařízení")
+	// hodnoty z konfigurace
+	/** @var string v config.neon hodnota title */
+	public $appName;
+	/** @var array */
+	public $links;
+
+	public function checkAcces(int $deviceUserId, string $type = "zařízení"): void
 	{
 		if ($this->getUser()->id != $deviceUserId) {
 			Logger::log(
 				'audit',
 				Logger::ERROR,
-				"Uzivatel #{$this->getUser()->id} {$this->getUser()->getIdentity()->email} zkusil editovat {$type} patrici uzivateli #{$deviceUserId}"
+				sprintf($this->texty_presentera->translate('log_base_not_allowed'), $this->getUser()->id, $this->getUser()->getIdentity()->email, $type, $deviceUserId)
 			);
-			$this->getUser()->logout();
-			$this->flashMessage("K tomuto {$type} nemáte práva!");
-			$this->redirect('Sign:in');
+			$this->getUser()->logout(true);
+			$this->flashRedirect('Sign:in', sprintf($this->texty_presentera->translate('base_not_rights'), $type), 'warning');
 		}
 	}
 
-	// hodnoty z konfigurace
-	public $appName;
-	public $links;
+	public function beforeRender(): void
+	{
+		parent::beforeRender();
+
+		$this->template->appName = $this->appName;
+		$this->template->links = $this->links;
+	}
 
 	public function populateTemplate($activeItem, $submenuAfterItem = FALSE, $submenu = NULL)
 	{
-		$this->template->appName = $this->appName;
-		$this->template->links = $this->links;
 		$this->template->path = "";
 
 		$this->populateMenu($activeItem, $submenuAfterItem, $submenu);
 	}
-
 
 	/**
 	 * Uprava formulare pro Boostrap4
