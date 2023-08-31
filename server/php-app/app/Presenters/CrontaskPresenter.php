@@ -66,9 +66,16 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 	/**
 	 * Zkontroluje prekroceni min/max limitu
 	 */
-	private function checkMinMaxLimits($sensor, $value_out, $data_ts)
+	private function checkMinMaxLimits($sensor /*, ?float $value_out, $data_ts*/): int
 	{
 		$zapisWarningy = 0;
+
+		$value_out = isset($sensor['last_out_value']) ? $sensor['last_out_value'] : null;
+		if ($value_out !== null) {
+			return $zapisWarningy;
+		}
+
+		$data_ts = $sensor['last_data_time'];
 
 		if (isset($sensor['warn_max']) && $sensor['warn_max']) { // mame hlidat maximum
 			if ($value_out >= $sensor['warn_max_val']) { // prekrocene maximum
@@ -160,7 +167,6 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 				Logger::log(self::NAME,  Logger::INFO,  "Notification NO_DATA cleared {$sensor['id']} [{$sensor['dev_name']}:{$sensor['name']}] ");
 			}
 		}
-
 		return $zapisWarningy;
 	}
 
@@ -171,25 +177,22 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 	{
 		$rows = $this->datasource->getSensors();
 		foreach ($rows as $sensor) {
-
 			$zapisWarningy = 0;
 
-			$value_out = isset($sensor['last_out_value']) ? $sensor['last_out_value'] : null;
-			if ($value_out !== null) {
-				$zapisWarningy += $this->checkMinMaxLimits($sensor, $value_out, $sensor['last_data_time']);
-			}
+			//$value_out = isset($sensor['last_out_value']) ? $sensor['last_out_value'] : null;
+			//if( $value_out !== null ) {
+			// Kontrola limitov min a max pre senzory	
+			$zapisWarningy += $this->checkMinMaxLimits($sensor /*, $value_out, $sensor['last_data_time'] */);
+			//}
 
 			if ($sensor['last_data_time'] && $sensor['monitoring']  && $sensor['msg_rate'] != 0) {
 				$zapisWarningy += $this->checkLastDataTs($sensor);
 			}
-
 			if ($zapisWarningy) {
 				$this->datasource->updateSensorsWarnings($sensor);
 			}
 		}
 	}
-
-
 
 	/**
 	 * Zpracuje cekajici notifikace
@@ -201,30 +204,20 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 		$rows = $this->datasource->getNotifications();
 		foreach ($rows as $row) {
 			$type = abs($row['event_type']);
-			$eventStart = $row['event_type'] > 0;
-			if ($eventStart) {
-				$prefix = "VAROVÁNÍ: ";
-			} else {
-				$prefix = "Konec poplachu: ";
-			}
 
-			if ($type == 1) {
-				$subject = "Hodnota moc vysoká - {$row['dev_name']}:{$row['s_name']}";
-				$text =
-					"<p>{$prefix} {$subject}</p>
-					<p><b>{$row['custom_text']}<b></p>
-					<p>
-					Hodnota: <b>{$row['out_value']} {$row['unit']}</b>
-					<br>Zařízení: <b>{$row['dev_name']}</b> ({$row['dev_desc']})
-					<br>Sensor: <b>{$row['s_name']}</b> ({$row['s_desc']})
-					<br>Čas: <b>{$row['event_ts']}</b>
-					</p>
-					";
-			} else if ($type == 2) {
-				$subject = "Hodnota příliš nízká - {$row['dev_name']}:{$row['s_name']}";
-				$text =
-					"<p>{$prefix} {$subject}</p>
-					<p><b>{$row['custom_text']}<b></p>
+			$prefix = $row['event_type'] > 0 ? "VAROVÁNÍ: " : "Konec poplachu: ";
+			$subject = [
+				1 => "Hodnota moc vysoká",
+				2 => "Hodnota příliš nízká",
+				4 => "Ze senzoru nepřichází data",
+			];
+			$head = $prefix . " " . $subject[$type] . " - {$row['dev_name']}:{$row['s_name']}";
+
+			$text = "<p>{$head}</p>";
+
+			if ($type == 1 || $type == 2) {
+				$text .=
+					"<p><b>{$row['custom_text']}<b></p>
 					<p>
 					Hodnota: <b>{$row['out_value']} {$row['unit']}</b>
 					<br>Zařízení: <b>{$row['dev_name']}</b> ({$row['dev_desc']})
@@ -233,10 +226,8 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 					</p>
 					";
 			} else if ($type == 4) {
-				$subject = "Ze senzoru nepřichází data - {$row['dev_name']}:{$row['s_name']}";
-				$text =
-					"<p>{$prefix} {$subject}</p>
-					<p>
+				$text .=
+					"<p>
 					Zařízení: <b>{$row['dev_name']}</b> ({$row['dev_desc']})
 					<br>Sensor: <b>{$row['s_name']}</b> ({$row['s_desc']})
 					<br>Poslední data: <b>{$row['custom_text']}<b>
@@ -245,13 +236,9 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 					";
 			}
 
-			$logger->write(Logger::INFO, "Notifikace #{$row['id']} '{$prefix} {$subject}' pro {$row['u1_email']}");
+			$logger->write(Logger::INFO, "Notifikace #{$row['id']} '{$head}' pro {$row['u1_email']}");
 
-			$this->mailService->sendMail(
-				$row['u1_email'],
-				"{$prefix} {$subject}",
-				$text
-			);
+			$this->mailService->sendMail($row['u1_email'], $head, $text);
 
 			$this->datasource->closeNotification($row['id']);
 		}
@@ -351,7 +338,6 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 	private function processMeasures($logger)
 	{
 		$records = $this->datasource->getRecordsForProcessing($this->batchSize);
-
 		$currentSensor = FALSE;
 		$currentDate = FALSE;
 		$currentHour = FALSE;
@@ -697,7 +683,53 @@ final class CrontaskPresenter extends Nette\Application\UI\Presenter
 	}
 
 
+	/**
+	 * Task spousteny kazdou hodinu; bezi maximalne minutu.
+	 
+	 * Ako alternativak minutovemu tasku na hostingoch, kde nie je minutovy task mozny...
+	 * 
+	 * Provadi akce:
+	 * - zkontroluje stav senzoru a nafrontuje pozadavky na notifikacni maily:
+	 *      - prekroceni min/max limitu
+	 *      - neprichazejici data
+	 * - odesle notifikacni maily, pokud nejake jsou
+	 * - smaze stare zaznamy v 'prelogin' a pokud jsou, aktualizuje odpovidajici zaznamy v 'devices'
+	 * - zpracuje 'measures' 
+	 *      - vygeneruje z novych zaznamu hodinova 'sumdata' 
+	 *      - vygeneruje ze zmenenych hodinovych 'sumdata' denni 'sumdata'
+	 * - projde nove obrazky (bloby s typem 'jpg' a nazvem 'camera' a otaguje ty, co jsou cerne)
+	 */
+	public function actionHour()
+	{
+		if (!$this->checkIp()) return;
 
+		try {
+
+			$logger = new Logger("cron");
+
+			$totalEnde = time() + $this->maxRunTime2  + $this->maxRunTime1;
+			$this->startTime = time();
+			$this->endTime = time() + $this->maxRunTime1;
+
+			$this->checkSensors($logger);
+			$this->sendNotificationMails($logger);
+			$this->processPrelogin($logger);
+
+			$this->processMeasures($logger);
+			$this->startTime = time();
+			$this->endTime = time() + $this->maxRunTime2;
+			$this->processSumdata($logger);
+
+			// nechame na obrazky zbytek do celkoveho maxima delky behu
+			$this->endTime = time() + $this->maxRunTime3;
+			if ($this->endTime >  $totalEnde) {
+				$this->endTime = $totalEnde;
+			}
+			$this->processImages($logger);
+		} catch (\Exception $e) {
+			$logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+		}
+	}
 
 
 
