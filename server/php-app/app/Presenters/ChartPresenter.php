@@ -1379,7 +1379,7 @@ final class ChartPresenter extends BasePresenter
 	 * mode = 0 ... denni prumer
 	 * mode = 1 ... denni minimum
 	 */
-	public function render_Avgyears($id, $token, $dateFrom, $lenDays, $altYear = NULL, $mode)
+	public function render_Avgyears($id, $token, $dateFrom, $lenDays, $altYear = NULL, $mode = 0)
 	{
 		$view = $this->datasource->getView($id, $token);
 
