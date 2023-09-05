@@ -1,5 +1,5 @@
 Prejmenujte
-	local.neon.sample
+	config_local.neon.sample
 na 
-	local.neon
+	config_local.neon
 a zadejte tam spravne hodnoty.

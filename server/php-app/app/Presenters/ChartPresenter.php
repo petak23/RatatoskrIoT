@@ -1359,7 +1359,7 @@ final class ChartPresenter extends BasePresenter
 		$response->setExpiration('1 min');
 
 		$time = intval((microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"]) * 1000.0);
-		Logger::log('webapp', Logger::DEBUG,  "[${_SERVER['REMOTE_ADDR']}] Avgtemp: ch={$id} rows={$this->dbRows} t={$time} ms");
+		Logger::log('webapp', Logger::DEBUG,  "[{_SERVER['REMOTE_ADDR']}] Avgtemp: ch={$id} rows={$this->dbRows} t={$time} ms");
 
 		$this->image->send(Image::PNG);
 	}
