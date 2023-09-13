@@ -39,6 +39,9 @@ services:
 	- App\Forms\Sign\SignInFormFactory
 
 	# models
+	- App\Model\PV_Devices
+	- App\Model\PV_Sensors
+	- App\Model\PV_Sessions
 	- App\Model\PV_User_main
 
 	- PeterVojtech\MainLayout\Favicon\IFaviconControl
@@ -83,5 +86,5 @@ http:
 		X-Content-Type-Options: nosniff
 		X-XSS-Protection: '1; mode=block'
 
-
-
+includes:
+	- ../ApiModule/config/config.neon
