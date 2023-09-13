@@ -9,7 +9,10 @@ services:
 #  - App\ApiModule\Presenters\MenuPresenter(%parameters%)
 #  - App\ApiModule\Presenters\ProductsPresenter(%parameters%, %wwwDir%)
 #  - App\ApiModule\Presenters\TexylaPresenter(%parameters%)
-  - App\ApiModule\Presenters\UnitsPresenter(%parameters%)
+	- App\ApiModule\Presenters\UnitsPresenter(%parameters%)
 
 # Models
-  - App\ApiModule\Model\Units
+	- App\ApiModule\Model\Devices
+	- App\ApiModule\Model\Sensors
+	- App\ApiModule\Model\Sessions
+	- App\ApiModule\Model\Units
