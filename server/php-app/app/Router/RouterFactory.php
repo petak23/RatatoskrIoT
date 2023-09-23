@@ -21,8 +21,8 @@ final class RouterFactory
 			//->addRoute('inventory/<action>[/<id>]', 'Inventory:user')
 			//->addRoute('sensor[/<action>[/<id>]]', 'Sensor:show')
 			->addRoute('api/units[/<action>[/<id>]]', 'Units:default')
-			//->addRoute('users', 'User:default')
-			//->addRoute('user[/<action>[/<id>]]', 'User:default')
+			->addRoute('api/user/<id>[/<action>]', 'Users:user')
+			->addRoute('api/users[/<action>[/<id>]]', 'Users:default')
 			//->addRoute('useracl[/<action>[/<id>]]', 'UserAcl:default')
 		;
 
