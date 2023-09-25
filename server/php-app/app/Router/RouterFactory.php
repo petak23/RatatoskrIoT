@@ -17,7 +17,8 @@ final class RouterFactory
 		$router = new RouteList;
 
 		$router->withModule('Api')
-			//->addRoute('device/<action>[/<id>]', 'Device:show')
+			->addRoute('api/device/<id>[/<action>]', 'Devices:device')
+			->addRoute('api/devices[/<action>[/<id>]]', 'Devices:default')
 			//->addRoute('inventory/<action>[/<id>]', 'Inventory:user')
 			//->addRoute('sensor[/<action>[/<id>]]', 'Sensor:show')
 			->addRoute('api/units[/<action>[/<id>]]', 'Units:default')

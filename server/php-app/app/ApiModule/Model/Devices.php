@@ -7,18 +7,19 @@ namespace App\ApiModule\Model;
 //use App\Model;
 use App\Services\Logger;
 use Nette;
+use Nette\Database\Table\ActiveRow;
 use Nette\Utils\DateTime;
 
 /**
  * Model, ktory sa stara o tabulku devices
  * 
- * Posledna zmena 15.07.2022
+ * Posledna zmena 25.09.2023
  * 
  * @author     Ing. Peter VOJTECH ml. <petak23@gmail.com>
- * @copyright  Copyright (c) 2012 - 2022 Ing. Peter VOJTECH ml.
+ * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version    1.0.4
+ * @version    1.0.5
  */
 class Devices
 {
@@ -50,19 +51,19 @@ class Devices
 		$this->pv_sensors = $pv_sensors;
 	}
 
-	public function getDevicesUser($userId): VDevices
+	public function getDevicesUser(int $userId, bool $return_as_array = false): VDevices|array
 	{
 		$rc = new VDevices();
 		// načítame zariadenia
 
-		$result = $this->devices->where(['user_id' => $userId])->order('name ASC');
+		$result = $this->devices->where(['user_id' => $userId])->order('id ASC');
 
 		foreach ($result as $row) {
-			$dev = new VDevice($row);
-			if ($dev->attrs->last_bad_login != NULL) {
-				if ($dev->attrs->last_login != NULL) {
-					$lastLoginTs = (DateTime::from($dev->attrs->last_login))->getTimestamp();
-					$lastErrLoginTs = (DateTime::from($dev->attrs->last_bad_login))->getTimestamp();
+			$dev = new VDevice($row, $return_as_array);
+			if ($dev->attrs['last_bad_login'] != NULL) {
+				if ($dev->attrs['last_login'] != NULL) {
+					$lastLoginTs = (DateTime::from($dev->attrs['last_login']))->getTimestamp();
+					$lastErrLoginTs = (DateTime::from($dev->attrs['last_bad_login']))->getTimestamp();
 					if ($lastErrLoginTs >  $lastLoginTs) {
 						$dev->problem_mark = true;
 					}
@@ -71,21 +72,49 @@ class Devices
 				}
 			}
 			// Pridám zariadenie a k nemu načítam senzory
-			$rc->addWithSensors($dev, $this->pv_sensors->getDeviceSensors($row->id, $row->monitoring));
+			$rc->addWithSensors($dev, $this->pv_sensors->getDeviceSensors($row->id, $row->monitoring), $return_as_array);
 		}
-		return $rc;
+		return $return_as_array ? $rc->returnAsArray() : $rc;
 	}
 
 	/** Pridanie zariadenia */
-	public function createDevice($values)
+	public function createDevice($values, bool $return_as_array = false): ActiveRow|array
 	{
-		return $this->devices->insert($values);
+		$d = $this->devices->insert($values);
+		$d = $return_as_array ? $d->toArray() : $d;
+		return $d;
 	}
 
 	/** Info o zariadení */
-	public function getDevice(int $deviceId): ?Nette\Database\Table\ActiveRow
-	{
-		return $this->devices->get($deviceId);
+	public function getDevice(
+		int $deviceId,
+		bool $with_sensors = false,
+		bool $return_as_array = false
+	): VDevice|array {
+
+		if (($_t = $this->devices->get($deviceId)) == null) {
+			return ['error' => "Device not found", 'error_n' => 1, 'device_id' => $deviceId];
+		}
+
+		$d = new VDevice($this->devices->get($deviceId));
+		if ($with_sensors) {
+			// Pridám zariadenie a k nemu načítam senzory
+			$sensors = $this->pv_sensors->getDeviceSensors($deviceId, $d->attrs->monitoring);
+			if ($sensors != null && $sensors->count()) {
+				foreach ($sensors as $s) {
+					$d->addSensor($s, $return_as_array);
+				}
+			}
+		}
+		if ($return_as_array) {
+			$_d = $d->attrs->toArray();
+			$_d['problem_mark'] = $d->problem_mark;
+			$_d['sensors'] = $d->sensors;
+			$_d['first_login'] = $d->attrs->first_login->format('d.m.Y H:i:s');
+			$_d['last_login'] = $d->attrs->last_login->format('d.m.Y H:i:s');
+			$d = $_d;
+		}
+		return $d;
 	}
 
 	public function deleteDevice($id)
@@ -159,14 +188,28 @@ class VDevices
 	}
 
 	/** Pridanie zariadenia aj so senzormi */
-	public function addWithSensors(VDevice $device, ?Nette\Database\Table\Selection $sensors): void
-	{
+	public function addWithSensors(
+		VDevice $device,
+		Nette\Database\Table\Selection $sensors,
+		bool $return_sensors_as_array = false
+	): void {
 		$this->devices[$device->attrs['id']] = $device;
 		if ($sensors != null && $sensors->count()) {
 			foreach ($sensors as $s) {
-				$this->devices[$device->attrs['id']]->addSensor($s);
+				$this->devices[$device->attrs['id']]->addSensor($s, $return_sensors_as_array);
 			}
 		}
+	}
+
+	public function returnAsArray(): array
+	{
+		$out = [];
+		foreach ($this->devices as $k => $v) {
+			$out[$k] = $v->attrs;
+			$out[$k]['problem_mark'] = $v->problem_mark;
+			$out[$k]['sensors'] = $v->sensors;
+		}
+		return $out;
 	}
 }
 
@@ -186,13 +229,13 @@ class VDevice
 	/** @var array Pole senzorov zariadenia */
 	public $sensors = [];
 
-	public function __construct(Nette\Database\Table\ActiveRow $attrs)
+	public function __construct(Nette\Database\Table\ActiveRow $attrs, bool $return_as_array = false)
 	{
-		$this->attrs = $attrs;
+		$this->attrs = $return_as_array ? $attrs->toArray() : $attrs;
 	}
 
-	public function addSensor(Nette\Database\Table\ActiveRow $sensorAttrs): void
+	public function addSensor(Nette\Database\Table\ActiveRow $sensorAttrs, bool $return_as_array = false): void
 	{
-		$this->sensors[$sensorAttrs->id] = $sensorAttrs;
+		$this->sensors[$sensorAttrs->id] = $return_as_array ? $sensorAttrs->toArray() : $sensorAttrs;
 	}
 }
