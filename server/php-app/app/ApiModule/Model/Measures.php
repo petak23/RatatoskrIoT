@@ -30,4 +30,9 @@ class Measures extends Table
 		}
 		return $out;
 	}
+
+	public function getLastMeasure(int $id_sensor): array 
+	{
+		$m = $this->findBy(['sensor_id' => $id_sensor])->order("data_time DESC")->limit(1)->fetch();
+	}
 }
