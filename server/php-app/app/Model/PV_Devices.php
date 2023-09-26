@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-use App\Model;
+//use App\Model;
 use App\Services\Logger;
 use Nette;
 use Nette\Utils\DateTime;
@@ -12,13 +12,13 @@ use Nette\Utils\DateTime;
 /**
  * Model, ktory sa stara o tabulku devices
  * 
- * Posledna zmena 15.07.2022
+ * Posledna zmena 26.09.2023
  * 
  * @author     Ing. Peter VOJTECH ml. <petak23@gmail.com>
- * @copyright  Copyright (c) 2012 - 2022 Ing. Peter VOJTECH ml.
+ * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version    1.0.4
+ * @version    1.0.5
  */
 class PV_Devices
 {
@@ -40,8 +40,10 @@ class PV_Devices
 
 	public function __construct(
 		Nette\Database\Explorer $database,
-		Model\PV_Sensors $pv_sensors,
-		Model\PV_Sessions $sessions
+		/*Model\*/
+		PV_Sensors $pv_sensors,
+		/*Model\*/
+		PV_Sessions $sessions
 	) {
 		$this->devices = $database->table("devices");
 		$this->measures = $database->table("measures");
