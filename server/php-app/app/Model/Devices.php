@@ -11,22 +11,19 @@ class Devices
     use Nette\SmartObject;
 
     public $devices;
-    
+
     public function __construct()
     {
         $this->devices = [];
     }
 
-    public function add( Model\Device $device ): void
+    public function add(Device $device): void
     {
-        $this->devices[ $device->attrs['id'] ] = $device;
+        $this->devices[$device->attrs['id']] = $device;
     }
 
-    public function get( int $id ) : Model\Device
+    public function get(int $id): Device
     {
         return $this->devices[$id];
     }
 }
-
-
-
