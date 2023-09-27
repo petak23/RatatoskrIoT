@@ -18,7 +18,7 @@
 
 	{if ($measureStats->count>0) }
 		Je zde 
-		<b>{$measureStats->count |number:0:',':' '}</b> záznamů od 
+		<b>{$measureStats->count |number:0, ',', ' '}</b> záznamů od 
 		<a href="../../../../chart/sensor/show/{$id}/?dateFrom={$measureStats->min_time |date:'Y-m-d'}&lenDays={$lenDays}&altYear={$altYear}"
 		>{$measureStats->min_time |date:'d.m.Y'}</a> 
 		do 
@@ -39,10 +39,10 @@
 	<h3>Sumární data</h3>	
 
 	<b>Statistika:</b>
-	{if ($sumdataStats->min_time?) }
+	{if $sumdataStats->min_time != null }
 		Je zde
-		<b>{$sumdataCount['hour'] |number:0:',':' '}</b> hodinových a 
-		<b>{$sumdataCount['day'] |number:0:',':' ' }</b> denních záznamů 
+		<b>{$sumdataCount['hour'] |number:0, ',', ' '}</b> hodinových a 
+		<b>{$sumdataCount['day'] |number:0, ',', ' '}</b> denních záznamů 
 		od
 		<a href="../../../../chart/sensor/show/{$id}/?dateFrom={$sumdataStats->min_time |date:'Y-m-d'}&lenDays={$lenDays}&altYear={$altYear}"
 		>{$sumdataStats->min_time |date:'d.m.Y'}</a> 
