@@ -19,3 +19,6 @@ services:
 	- App\ApiModule\Model\Sessions
 	- App\ApiModule\Model\Units
 	- App\ApiModule\Model\User_main
+	- App\ApiModule\Model\User_permission
+	- App\ApiModule\Model\User_resource
+	- App\ApiModule\Model\User_roles

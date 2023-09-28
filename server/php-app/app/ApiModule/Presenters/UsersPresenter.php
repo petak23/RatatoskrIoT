@@ -2,11 +2,11 @@
 
 namespace App\ApiModule\Presenters;
 
-use App\ApiModule\Model;
+//use App\ApiModule\Model;
 
 /**
  * Prezenter pre pristup k api užívateľov.
- * Posledna zmena(last change): 23.09.2023
+ * Posledna zmena(last change): 28.09.2023
  *
  * Modul: API
  *
@@ -14,14 +14,14 @@ use App\ApiModule\Model;
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.0
+ * @version 1.0.1
  */
 class UsersPresenter extends BasePresenter
 {
 
 	// -- DB
-	/** @var Model\User_main @inject */
-	public $user_main;
+	/* * @var Model\User_main @inject */
+	//public $user_main;
 
 	public function actionDefault(): void
 	{

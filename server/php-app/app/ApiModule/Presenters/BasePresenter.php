@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\ApiModule\Presenters;
 
-//use DbTable;
+use App\ApiModule\Model;
 use Nette\Application\UI\Presenter;
 
 /**
@@ -23,54 +23,63 @@ use Nette\Application\UI\Presenter;
 abstract class BasePresenter extends Presenter
 {
 
-  // -- DB
-  /* * @var DbTable\Hlavne_menu @inject */
-  //public $hlavne_menu;
-  /* * @var DbTable\Lang @inject*/
-  //public $lang;
-  /* * @var DbTable\User_roles @inject */
-  //public $user_roles;
-  /* * @var DbTable\Udaje @inject */
-  //public $udaje;
-  /* * @var DbTable\Verzie @inject */
-  //public $verzie;
+	// -- DB
+	/** @var Model\User_main @inject */
+	public $user_main;
+	/** @var Model\User_permission @inject */
+	public $user_permission;
+	/* * @var DbTable\Hlavne_menu @inject */
+	//public $hlavne_menu;
+	/* * @var DbTable\Lang @inject*/
+	//public $lang;
+	/* * @var DbTable\User_roles @inject */
+	//public $user_roles;
+	/* * @var DbTable\Udaje @inject */
+	//public $udaje;
+	/* * @var DbTable\Verzie @inject */
+	//public $verzie;
 
-  /** @persistent */
-  public $language = 'sk';
+	/** @persistent */
+	public $language = 'sk';
 
-  /** @var int Uroven registracie uzivatela  */
-  public $id_reg;
+	/** @var int Uroven registracie uzivatela  */
+	public $id_reg;
 
-  /** @var array nastavenie z config-u */
-  public $nastavenie;
-  /** @var array - pole s chybami pri uploade */
-  public $upload_error = [
-    0 => "Bez chyby. Súbor úspešne nahraný.",
-    1 => "Nahrávaný súbor je väčší ako systémom povolená hodnota!",
-    2 => "Nahrávaný súbor je väčší ako je formulárom povolená hodnota!",
-    3 => "Nahraný súbor bol nahraný len čiastočne...",
-    4 => "Žiadny súbor nebol nahraný... Pravdepodobne ste vo formuláry žiaden nezvolili!",
-    5 => "Upload error 5.",
-    6 => "Chýbajúci dočasný priečinok!",
-  ];
+	/** @var array nastavenie z config-u */
+	public $nastavenie;
+	/** @var array - pole s chybami pri uploade */
+	public $upload_error = [
+		0 => "Bez chyby. Súbor úspešne nahraný.",
+		1 => "Nahrávaný súbor je väčší ako systémom povolená hodnota!",
+		2 => "Nahrávaný súbor je väčší ako je formulárom povolená hodnota!",
+		3 => "Nahraný súbor bol nahraný len čiastočne...",
+		4 => "Žiadny súbor nebol nahraný... Pravdepodobne ste vo formuláry žiaden nezvolili!",
+		5 => "Upload error 5.",
+		6 => "Chýbajúci dočasný priečinok!",
+	];
 
-  public function __construct(array $parameters)
-  {
-    // Nastavenie z config-u
-    $this->nastavenie = $parameters;
-  }
+	public function __construct(array $parameters)
+	{
+		// Nastavenie z config-u
+		$this->nastavenie = $parameters;
+	}
 
-  /** Vychodzie nastavenia */
-  /*protected function startup(): void {
-    parent::startup();
-    // Sprava uzivatela
-    $user = $this->getUser(); //Nacitanie uzivatela
-    // Kontrola prihlasenia a nacitania urovne registracie
-    $this->id_reg = ($user->isLoggedIn()) ? $user->getIdentity()->id_user_roles : 0;
-    
-    // Kontrola ACL
-    if (!($user->isAllowed($this->name, $this->action))) { 
-      $this->error("Not allowed");
-    }
-  }*/
+	/** Vychodzie nastavenia */
+	protected function startup(): void
+	{
+		parent::startup();
+		// Sprava uzivatela
+		$user = $this->getUser(); //Nacitanie uzivatela
+		// Kontrola prihlasenia a nacitania urovne registracie
+		$this->id_reg = ($user->isLoggedIn()) ? $this->user_main->getUser($user->getId())->id_user_roles : 0;
+
+		// Kontrola ACL
+		/*if (!($user->isAllowed($this->name, $this->action))) {
+			$this->error("Not allowed");
+		}*/
+		if (!($this->user_permission->check($this->id_reg, $this->name))) {
+			$this->error("Not allowed");
+		}
+		dumpe("Allowed", $this->name, $this->action);
+	}
 }
