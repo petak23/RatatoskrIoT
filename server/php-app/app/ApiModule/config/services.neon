@@ -6,6 +6,7 @@
 #
 services:
 	- App\ApiModule\Presenters\DevicesPresenter(%parameters%)
+	- App\ApiModule\Presenters\HomepagePresenter(%parameters%)
 #  - App\ApiModule\Presenters\MenuPresenter(%parameters%)
 #  - App\ApiModule\Presenters\ProductsPresenter(%parameters%, %wwwDir%)
 #  - App\ApiModule\Presenters\TexylaPresenter(%parameters%)

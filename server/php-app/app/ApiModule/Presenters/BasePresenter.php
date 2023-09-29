@@ -10,7 +10,7 @@ use Nette\Application\UI\Presenter;
 /**
  * Zakladny presenter pre vsetky presentery v module API
  * 
- * Posledna zmena(last change): 13.09.2023
+ * Posledna zmena(last change): 29.09.2023
  *
  * Modul: API
  *
@@ -18,7 +18,7 @@ use Nette\Application\UI\Presenter;
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.3
+ * @version 1.0.4
  */
 abstract class BasePresenter extends Presenter
 {
@@ -74,12 +74,14 @@ abstract class BasePresenter extends Presenter
 		$this->id_reg = ($user->isLoggedIn()) ? $this->user_main->getUser($user->getId())->id_user_roles : 0;
 
 		// Kontrola ACL
-		/*if (!($user->isAllowed($this->name, $this->action))) {
-			$this->error("Not allowed");
-		}*/
-		if (!($this->user_permission->check($this->id_reg, $this->name))) {
+		if (!($user->isAllowed($this->name, $this->action))) {
 			$this->error("Not allowed");
 		}
-		dumpe("Allowed", $this->name, $this->action);
+	}
+
+	public function beforeRender(): void
+	{
+		$this->template->appName = $this->nastavenie['title'];
+		$this->template->links = $this->nastavenie['links'];
 	}
 }

@@ -57,3 +57,9 @@ UPDATE `rausers` SET `id_user_roles` = '4' WHERE `id` = '1';
 
 ALTER TABLE `sensors`
 ADD `warning_icon` tinyint NOT NULL DEFAULT '0' COMMENT 'Upozornenie na chýbajúce dáta';
+
+INSERT INTO `user_resource` (`name`)
+VALUES ('Api:Homepage');
+
+INSERT INTO `user_permission` (`id_user_roles`, `id_user_resource`, `actions`)
+VALUES ('3', '4', NULL);
