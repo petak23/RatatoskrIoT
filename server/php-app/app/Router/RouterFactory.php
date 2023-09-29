@@ -18,13 +18,14 @@ final class RouterFactory
 
 		$router->withModule('Api')
 			->addRoute('api/device/<id>[/<action>]', 'Devices:device')
+			->addRoute('api/sensor/last/<id>', 'Devices:measureslast')
 			->addRoute('api/devices[/<action>[/<id>]]', 'Devices:default')
 			//->addRoute('inventory/<action>[/<id>]', 'Inventory:user')
 			//->addRoute('sensor[/<action>[/<id>]]', 'Sensor:show')
 			->addRoute('api/units[/<action>[/<id>]]', 'Units:default')
 			->addRoute('api/user/<id>[/<action>]', 'Users:user')
 			->addRoute('api/users[/<action>[/<id>]]', 'Users:default')
-			//->addRoute('useracl[/<action>[/<id>]]', 'UserAcl:default')
+			//->addRoute('api/<presenter>[/<action>[/<id>]]', 'Homepage:default')
 		;
 
 		$router->addRoute('chart/view/<token>/<id>/', 'Chart:view');

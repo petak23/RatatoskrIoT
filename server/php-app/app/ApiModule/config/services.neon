@@ -22,3 +22,5 @@ services:
 	- App\ApiModule\Model\User_permission
 	- App\ApiModule\Model\User_resource
 	- App\ApiModule\Model\User_roles
+
+	- App\ApiModule\Model\AuthorizatorFactory::create(@Nette\Database\Explorer)

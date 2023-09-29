@@ -54,3 +54,6 @@ ADD `id_user_roles` int NOT NULL DEFAULT '1' COMMENT 'Rola užívateľa' AFTER `
 ADD FOREIGN KEY (`id_user_roles`) REFERENCES `user_roles` (`id`);
 
 UPDATE `rausers` SET `id_user_roles` = '4' WHERE `id` = '1';
+
+ALTER TABLE `sensors`
+ADD `warning_icon` tinyint NOT NULL DEFAULT '0' COMMENT 'Upozornenie na chýbajúce dáta';

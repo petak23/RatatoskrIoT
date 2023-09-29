@@ -6,7 +6,7 @@ use App\ApiModule\Model;
 
 /**
  * Prezenter pre pristup k api užívateľov.
- * Posledna zmena(last change): 25.09.2023
+ * Posledna zmena(last change): 29.09.2023
  *
  * Modul: API
  *
@@ -14,7 +14,7 @@ use App\ApiModule\Model;
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.0
+ * @version 1.0.1
  */
 class DevicesPresenter extends BasePresenter
 {
@@ -35,8 +35,20 @@ class DevicesPresenter extends BasePresenter
 		$this->sendJson($this->devices->getDevice($id, true, true));
 	}
 
+	/** Vráti zoznam senzorov pre dané zariadenie */
+	public function actionSensors(int $id): void
+	{
+		$d = $this->devices->getDevice($id, true, true);
+		$this->sendJson($d["sensors"]);
+	} 
+
 	public function actionMeasures(int $id): void
 	{
 		$this->sendJson($this->measures->getMeasures($id));
+	}
+
+	public function actionMeasureslast(int $id): void
+	{
+		$this->sendJson($this->measures->getLastMeasure($id));
 	}
 }
