@@ -27,6 +27,8 @@ final class RouterFactory
 			->addRoute('api/users[/<action>[/<id>]]', 'Users:default')
 			//->addRoute('api/users[/<action>[/<id>]]', 'Users:default')
 			->addRoute('api[/<presenter>[/<action>[/<id>]]]', 'Homepage:default');
+		$router->withModule('Front')
+			->addRoute('front[/<path>[/<id>]]', 'Homepage:default');
 
 		$router->addRoute('chart/view/<token>/<id>/', 'Chart:view');
 		$router->addRoute('chart/sensor/show/<id>/', 'Chart:sensor');

@@ -19,7 +19,9 @@ CREATE TABLE `user_permission` (
 INSERT INTO `user_permission` (`id`, `id_user_roles`, `id_user_resource`, `actions`) VALUES
 (1,	3,	1,	NULL),
 (2,	1,	2,	NULL),
-(3,	4,	3,	NULL);
+(3,	4,	3,	NULL),
+(4,	3,	4,	NULL),
+(5,	1,	5,	NULL);
 
 DROP TABLE IF EXISTS `user_resource`;
 CREATE TABLE `user_resource` (
@@ -31,7 +33,9 @@ CREATE TABLE `user_resource` (
 INSERT INTO `user_resource` (`id`, `name`) VALUES
 (1,	'Api:Devices'),
 (2,	'Api:Units'),
-(3,	'Api:Users');
+(3,	'Api:Users'),
+(4,	'Api:Homepage'),
+(5,	'Front:Homepage');
 
 DROP TABLE IF EXISTS `user_roles`;
 CREATE TABLE `user_roles` (
@@ -57,9 +61,3 @@ UPDATE `rausers` SET `id_user_roles` = '4' WHERE `id` = '1';
 
 ALTER TABLE `sensors`
 ADD `warning_icon` tinyint NOT NULL DEFAULT '0' COMMENT 'Upozornenie na chýbajúce dáta';
-
-INSERT INTO `user_resource` (`name`)
-VALUES ('Api:Homepage');
-
-INSERT INTO `user_permission` (`id_user_roles`, `id_user_resource`, `actions`)
-VALUES ('3', '4', NULL);

@@ -88,3 +88,16 @@ http:
 
 includes:
 	- ../ApiModule/config/config.neon
+	- ../FrontModule/config/config.neon
+
+extensions:
+  webpack: Contributte\Webpack\DI\WebpackExtension(%debugMode%, %consoleMode%)
+
+webpack:
+  build:
+    directory: %wwwDir%/dist
+    publicPath: dist/
+  # devServer - tato cast je presunuta do config.local.neon
+#  manifest:  # Cez tento subor je prepojenie na filename: '[name].[contenthash:8].[ext]' vo webpack-u
+#    name: webpack-assets.json  # ./www/dist/webpack-assets.json
+#    mapper: Contributte\Webpack\Manifest\Mapper\AssetsWebpackPluginMapper
