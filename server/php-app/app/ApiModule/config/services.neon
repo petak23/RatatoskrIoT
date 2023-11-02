@@ -25,3 +25,5 @@ services:
 	- App\ApiModule\Model\User_roles
 
 	- App\ApiModule\Model\AuthorizatorFactory::create(@Nette\Database\Explorer)
+
+	- App\Services\ApiConfig( %links%, %title%, %dataRetentionDays%,  %minYear%)

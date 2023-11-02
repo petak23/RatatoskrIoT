@@ -2,11 +2,11 @@
 
 namespace App\ApiModule\Presenters;
 
-//use App\ApiModule\Model;
+use App\Services;
 
 /**
  * Domáci presenter pre API.
- * Posledna zmena(last change): 29.09.2023
+ * Posledna zmena(last change): 27.10.2023
  *
  * Modul: API
  *
@@ -14,13 +14,27 @@ namespace App\ApiModule\Presenters;
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.0
+ * @version 1.0.1
  */
 class HomepagePresenter extends BasePresenter
 {
 
+	private $config;
+
+	public function __construct(array $parameters, Services\ApiConfig $config)
+	{
+		// Nastavenie z config-u
+		$this->nastavenie = $parameters;
+		$this->config = $config;
+	}
+
 	public function actionDefault(): void
 	{
 		//$this->sendJson($this->units->getUnits());
+	}
+
+	public function actionMyAppSettings(): void
+	{
+		$this->sendJson($this->config->getConfigs());
 	}
 }

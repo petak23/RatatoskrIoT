@@ -1,7 +1,9 @@
-/*$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
 @import "~@fortawesome/fontawesome-free/scss/solid.scss";
-@import 'bootstrap/dist/css/bootstrap.css';
+@import "~@fortawesome/fontawesome-free/scss/brands.scss";
+
+/*@import 'bootstrap/dist/css/bootstrap.css';
 @import 'bootstrap-vue/dist/bootstrap-vue.css';
 //@import 'css2.css';
 @import 'bwfoto.css';

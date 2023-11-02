@@ -6,6 +6,7 @@ namespace App\FrontModule\Presenters;
 
 use App\ApiModule\Model;
 use Nette\Application\UI\Presenter;
+use PeterVojtech;
 
 /**
  * Zakladny presenter pre vsetky presentery vo Front module 
@@ -22,6 +23,8 @@ use Nette\Application\UI\Presenter;
  */
 abstract class BasePresenter extends Presenter
 {
+
+	use PeterVojtech\MainLayout\Favicon\faviconTrait;
 
 	// -- DB
 	/** @var Model\User_main @inject */

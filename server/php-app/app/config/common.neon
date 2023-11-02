@@ -98,6 +98,6 @@ webpack:
     directory: %wwwDir%/dist
     publicPath: dist/
   # devServer - tato cast je presunuta do config.local.neon
-#  manifest:  # Cez tento subor je prepojenie na filename: '[name].[contenthash:8].[ext]' vo webpack-u
-#    name: webpack-assets.json  # ./www/dist/webpack-assets.json
+  manifest:  # Cez tento subor je prepojenie na filename: '[name].[contenthash:8].[ext]' vo webpack-u
+    name: manifest.json  # ./www/dist/manifest.json
 #    mapper: Contributte\Webpack\Manifest\Mapper\AssetsWebpackPluginMapper

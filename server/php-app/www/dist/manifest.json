@@ -1,0 +1,9 @@
+{
+  "front.css": "front.bundle.css",
+  "front.js": "front.bundle.js",
+  "fonts/fa-solid-900.ttf": "fonts/d75e3fd1eb12e9bd6655.ttf",
+  "fonts/fa-brands-400.ttf": "fonts/016b4a6cdced82ab3aa1.ttf",
+  "fonts/fa-solid-900.woff2": "fonts/b6879d41b0852f01ed5b.woff2",
+  "fonts/fa-brands-400.woff2": "fonts/878f31251d960bd6266f.woff2",
+  "front.bundle.js.map": "front.bundle.js.map"
+}
