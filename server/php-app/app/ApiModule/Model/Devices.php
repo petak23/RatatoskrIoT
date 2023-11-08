@@ -236,6 +236,10 @@ class VDevice
 
 	public function addSensor(Nette\Database\Table\ActiveRow $sensorAttrs, bool $return_as_array = false): void
 	{
-		$this->sensors[$sensorAttrs->id] = $return_as_array ? $sensorAttrs->toArray() : $sensorAttrs;
+		if ($return_as_array) {
+			$out = $sensorAttrs->toArray();
+			//$out['value_name'] = $sensorAttrs->value_type->name;
+		}
+		$this->sensors[$sensorAttrs->id] = $return_as_array ? $out : $sensorAttrs;
 	}
 }

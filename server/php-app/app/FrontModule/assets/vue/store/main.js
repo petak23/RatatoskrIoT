@@ -8,9 +8,9 @@ export const useMainStore = defineStore('main', () => {
     count.value++
   }*/
 
-	const basePath = ref("http://localhost/~petak23/RatatoskrIoT/server/php-app/")
+	const baseUrl = ref("")
 
-	const apiPath = computed(() => basePath.value + "api/") // Cesta k API
+	const apiPath = computed(() => baseUrl.value + "api/") // Cesta k API
 
 	const appName = ref("")  // Meno aplikácie
 
@@ -20,5 +20,5 @@ export const useMainStore = defineStore('main', () => {
 			
 	const minYear = ref(2000)
 
-  return { basePath, apiPath, appName, links, dataRetentionDays, minYear }
+  return { baseUrl, apiPath, appName, links, dataRetentionDays, minYear }
 })

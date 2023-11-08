@@ -24,7 +24,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
 				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel je neprihlaseny, jdeme na login."
 			);
 
-			if ($this->getUser()->logoutReason === Nette\Security\IUserStorage::INACTIVITY) {
+			if ($this->getUser()->logoutReason === Nette\Security\UserStorage::LOGOUT_INACTIVITY) {
 				$this->flashMessage('Dlouho jste neudělal/a žádnou akci, z bezpečnostních důvodů došlo k odhlášení. Přihlašte se prosím znovu.');
 			} else {
 				$this->flashMessage('Pro využití této funkce se nejprve přihlašte.');

@@ -1,19 +1,21 @@
 <script>
 import { onMounted, ref } from 'vue'
+import { useMainStore } from '../store/main'
 import axios from 'axios'
 
 export default {
 	setup () {
 
+		const store = useMainStore()
+
 		const items = ref(null)
 
 		onMounted(()=> {
-			getUnits();
+			getDevices();
 		}) 
 
-		const getUnits = () => {
-			//let odkaz = this.$store.state.apiPath + 'units'
-			let odkaz = "http://localhost/~petak23/RatatoskrIoT/server/php-app/api/units"
+		const getDevices = () => {
+			let odkaz = store.apiPath + 'devices'
 			axios.get(odkaz)
 				.then(response => {
 					//console.log(response.data)
@@ -32,17 +34,26 @@ export default {
 
 <template>
 	<div class="col-12 h1">
-		<h1>Jednotky</h1>
+		<h1>Zariadenia</h1>
 	</div>
 	<div v-if="items != null" class="col-12 table">
 		<table>
 			<tr>
 				<th>Id</th>
-				<td v-for="(id) in items" :key="id">{{ id }}</td>
+				<th>Meno<br /><small>Popis</small></th>
+				<th>Senzory</th>
 			</tr>
-			<tr>
-				<th>Meno</th>
-				<td v-for="(id, unit) in items" :key="id">{{ unit }}</td>
+			<tr v-for="item in items" :key="item.id">
+				<td>{{ item.id }}</td>
+				<td>
+					{{ item.name }}<br />
+					<small>{{ item.decs }}</small>
+				</td>
+				<td>
+					<div v-for="sen in item.sensors" :key="sen.id">
+						{{ sen.name }}({{ sen.last_out_value }})
+					</div>
+				</td>
 			</tr>
 		</table>
 	</div>

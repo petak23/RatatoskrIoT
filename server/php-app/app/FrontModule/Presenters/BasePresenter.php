@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\FrontModule\Presenters;
 
 use App\ApiModule\Model;
+use App\Services\Logger;
+use Nette;
 use Nette\Application\UI\Presenter;
 use PeterVojtech;
 
@@ -76,9 +78,52 @@ abstract class BasePresenter extends Presenter
 		// Kontrola prihlasenia a nacitania urovne registracie
 		$this->id_reg = ($user->isLoggedIn()) ? $this->user_main->getUser($user->getId())->id_user_roles : 0;
 
+		$this->checkUserRole('admin');
+
 		// Kontrola ACL
-		if (!($user->isAllowed($this->name, $this->action))) {
+		/*if (!($user->isAllowed($this->name, $this->action))) {
+			
 			$this->error("Not allowed");
+		}*/
+	}
+
+	public function checkUserRole($reqRole)
+	{
+		if (!$this->getUser()->loggedIn) {
+			Logger::log(
+				'webapp',
+				Logger::ERROR,
+				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel je neprihlaseny, jdeme na login."
+			);
+
+			if ($this->getUser()->logoutReason === Nette\Security\UserStorage::LOGOUT_INACTIVITY) {
+				$this->flashMessage('Dlouho jste neudělal/a žádnou akci, z bezpečnostních důvodů došlo k odhlášení. Přihlašte se prosím znovu.');
+			} else {
+				$this->flashMessage('Pro využití této funkce se nejprve přihlašte.');
+			}
+
+			$response = $this->getHttpResponse();
+			$response->setHeader('Cache-Control', 'no-cache');
+			$response->setExpiration('1 sec');
+
+			// https://pla.nette.org/cs/jak-po-odeslani-formulare-zobrazit-stejnou-stranku
+			$this->redirect(':Sign:in', ['backlink' => $this->storeRequest()]);
+		}
+
+		if (!$this->getUser()->isInRole($reqRole)) {
+			Logger::log(
+				'audit',
+				Logger::ERROR,
+				"[{$this->getHttpRequest()->getRemoteAddress()}] ACCESS: Uzivatel #{$this->getUser()->id} {$this->getUser()->getIdentity()->username} zkusil pouzit funkci vyzadujici roli {$reqRole}"
+			);
+
+			$response = $this->getHttpResponse();
+			$response->setHeader('Cache-Control', 'no-cache');
+			$response->setExpiration('1 sec');
+
+			$this->getUser()->logout(true);
+			$this->flashMessage('Vaše úroveň oprávnění nestačí k použití této funkce!');
+			$this->redirect(':Sign:in');
 		}
 	}
 

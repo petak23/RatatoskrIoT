@@ -6,8 +6,10 @@ import axios from 'axios'
 const store = useMainStore()
 
 const getMySettings = () => {
+	store.baseUrl = document.getElementById('app').dataset.baseUrl + "/"
+	//console.log(dataset)
 	let odkaz = store.apiPath + 'homepage/myappsettings'
-	
+
 	axios.get(odkaz)
 		.then(response => {
 			//console.log(response.data)

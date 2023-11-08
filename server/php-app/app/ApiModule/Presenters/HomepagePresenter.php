@@ -35,6 +35,8 @@ class HomepagePresenter extends BasePresenter
 
 	public function actionMyAppSettings(): void
 	{
-		$this->sendJson($this->config->getConfigs());
+		$out = $this->config->getConfigs();
+		$out['basePath'] = $this->template->basePath;
+		$this->sendJson($out);
 	}
 }
