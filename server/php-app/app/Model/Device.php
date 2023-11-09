@@ -17,22 +17,20 @@ class Device
 
 	/**
 	 * @var array Pole poli s indexy
-	 * id	device_id	channel_id	name	device_class	value_type	msg_rate	desc	display_nodata_interval	preprocess_data	preprocess_factor	dc_desc	unit
+	 * id	device_id	channel_id	name	device_class	id_value_types	msg_rate	desc	display_nodata_interval	preprocess_data	preprocess_factor	dc_desc	unit
 	 */
 	public $sensors = [];
 
 	/** @var bool Príznak problému */
-  public $problem_mark = false;
+	public $problem_mark = false;
 
-	public function __construct( $attrs )
+	public function __construct($attrs)
 	{
 		$this->attrs = $attrs;
 	}
-	
-	public function addSensor( array $sensorAttrs ): void
-	{
-		$this->sensors[ $sensorAttrs['id'] ] = $sensorAttrs;
-	}
 
-	
+	public function addSensor(array $sensorAttrs): void
+	{
+		$this->sensors[$sensorAttrs['id']] = $sensorAttrs;
+	}
 }

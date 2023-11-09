@@ -67,7 +67,7 @@ class InventoryDataSource
 			left outer join device_classes dc
 			on s.device_class=dc.id
 			left outer join value_types vt
-			on s.value_type=vt.id
+			on s.id_value_types=vt.id
 			left outer join devices d
 			on s.device_id = d.id
 			where d.user_id = ?
@@ -120,7 +120,7 @@ class InventoryDataSource
 			on s.device_id = d.id
 
 			left outer join value_types vt
-			on s.value_type = vt.id
+			on s.id_value_types = vt.id
 			
 			where s.id = ?
 		', $sensorId);
@@ -238,7 +238,7 @@ class InventoryDataSource
 			left outer join devices d
 			on s.device_id = d.id
 			left outer join value_types vt
-			on s.value_type = vt.id
+			on s.id_value_types = vt.id
 			where d.user_id = ?
 			order by vt.unit asc, d.name asc, s.name asc
 		', $userId);
@@ -500,7 +500,7 @@ class InventoryDataSource
 			vt.unit
 			from  sensors s
 			left outer join value_types vt
-			on s.value_type = vt.id
+			on s.id_value_types = vt.id
 			where device_id = ?
 			order by id asc
 		', $deviceId);

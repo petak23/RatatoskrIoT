@@ -34,28 +34,35 @@ export default {
 
 <template>
 	<div class="col-12 h1">
-		<h1>Zariadenia</h1>
+		<h1>Prehľad:</h1>
 	</div>
-	<div v-if="items != null" class="col-12 table">
-		<table>
-			<tr>
-				<th>Id</th>
-				<th>Meno<br /><small>Popis</small></th>
-				<th>Senzory</th>
-			</tr>
-			<tr v-for="item in items" :key="item.id">
-				<td>{{ item.id }}</td>
-				<td>
-					{{ item.name }}<br />
-					<small>{{ item.decs }}</small>
-				</td>
-				<td>
-					<div v-for="sen in item.sensors" :key="sen.id">
-						{{ sen.name }}({{ sen.last_out_value }})
+	
+	<div class="row row-cols-1 row-cols-md-3 g-4 mb-2" v-if="items != null">
+		<div v-for="item in items" :key="item.id" class="col">
+			<div class="card h-100 text-bg-dark border-warning">
+				<h5 class="card-header">
+					{{ item.name }}
+				</h5>
+				<div class="card-body">
+					<p class="card-text"><small>{{ item.decs }}</small></p>
+					<h6 class="card-title">Posledné hodnoty zo senzorov:</h6>
+					<ul class="list-group list-group-flush">
+						<li 
+							v-for="sen in item.sensors"
+							:key="sen.id"
+							class="list-group-item text-bg-dark"
+						>
+							{{ sen.last_out_value.toFixed(2) }} {{ sen.value_unit }}
+						</li>
+					</ul>
+					<div class="d-flex justify-content-end border-top border-secondary pt-2">
+						<a href="#" class="btn btn-outline-info">
+							Viac info <i class="fa-solid fa-angles-right"></i>
+						</a>
 					</div>
-				</td>
-			</tr>
-		</table>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 

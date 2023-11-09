@@ -18,7 +18,7 @@ class ViewItem
     /**
      * Pole senzorů. Každý senzor má vlastnosti:
      * 
-     * id	device_id	channel_id	name	device_class	value_type	msg_rate	desc	display_nodata_interval	
+     * id	device_id	channel_id	name	device_class	id_value_types	msg_rate	desc	display_nodata_interval	
      * preprocess_data	preprocess_factor	
      * dev_name	dev_desc dev_id
      * unit
@@ -27,10 +27,10 @@ class ViewItem
 
     public function isKompozit()
     {
-        return sizeof($this->sensors)>1;
+        return sizeof($this->sensors) > 1;
     }
 
-    public function getSensorName( $i )
+    public function getSensorName($i)
     {
         return "{$this->sensors[0]->dev_name}:{$this->sensors[0]->name}";
     }
@@ -38,8 +38,8 @@ class ViewItem
     public function getSensorsName()
     {
         $out = "";
-        foreach( $this->sensors as $sensor ) {
-            if( strlen($out)>0 ) {
+        foreach ($this->sensors as $sensor) {
+            if (strlen($out) > 0) {
                 $out .= "+";
             }
             $out .= "{$sensor->dev_name}:{$sensor->name}";
@@ -50,23 +50,23 @@ class ViewItem
     public function getSensorsDesc()
     {
         $out = "";
-        foreach( $this->sensors as $sensor ) {
-            if( strlen($out)>0 ) {
+        foreach ($this->sensors as $sensor) {
+            if (strlen($out) > 0) {
                 $out .= " | ";
             }
             $out .= $sensor->desc;
         }
-        if( $this->isKompozit() ) {
+        if ($this->isKompozit()) {
             $out = "Kompozit: " . $out;
         }
         return $out;
     }
 
-    public function pushSensor( $sensor )
+    public function pushSensor($sensor)
     {
         $this->sensors[] = $sensor;
     }
-    
+
     public $axisY;
     public $source;
     public $sourceDesc;
@@ -88,27 +88,28 @@ class ViewItem
         return $vi;
     }
 
-    public function getUnit() {
+    public function getUnit()
+    {
         return $this->sensors[0]->unit;
     }
 
-    public function setColor( $nr, $colorText )
+    public function setColor($nr, $colorText)
     {
-        $this->colors[$nr] = Color::parseColor( $colorText );
+        $this->colors[$nr] = Color::parseColor($colorText);
     }
 
-    public function getColor( $nr )
+    public function getColor($nr)
     {
-        if( ! isset($this->colors[$nr]) ) {
-            throw new \Exception( "Color #{$nr} has not been defined.");
+        if (!isset($this->colors[$nr])) {
+            throw new \Exception("Color #{$nr} has not been defined.");
         }
         return $this->colors[$nr];
     }
 
     public function __construct()
     {
-        $this->colors=array();
-        $this->sensors=array();
+        $this->colors = array();
+        $this->sensors = array();
     }
 
     public function toString()
@@ -121,6 +122,3 @@ class ViewItem
      */
     public $sensorIds;
 }
-
-
-

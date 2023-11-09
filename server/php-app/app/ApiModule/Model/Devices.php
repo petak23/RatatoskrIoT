@@ -13,13 +13,13 @@ use Nette\Utils\DateTime;
 /**
  * Model, ktory sa stara o tabulku devices
  * 
- * Posledna zmena 25.09.2023
+ * Posledna zmena 09.11.2023
  * 
  * @author     Ing. Peter VOJTECH ml. <petak23@gmail.com>
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version    1.0.5
+ * @version    1.0.6
  */
 class Devices
 {
@@ -237,8 +237,10 @@ class VDevice
 	public function addSensor(Nette\Database\Table\ActiveRow $sensorAttrs, bool $return_as_array = false): void
 	{
 		if ($return_as_array) {
-			$out = $sensorAttrs->toArray();
-			//$out['value_name'] = $sensorAttrs->value_type->name;
+			$out = array_merge(
+				['value_unit' => $sensorAttrs->value_types->unit],
+				$sensorAttrs->toArray()
+			);
 		}
 		$this->sensors[$sensorAttrs->id] = $return_as_array ? $out : $sensorAttrs;
 	}

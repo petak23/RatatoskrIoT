@@ -13,11 +13,11 @@ use Tracy\Debugger;
 class SensorDataSeries
 {
     use Nette\SmartObject;
-    
+
     /**
      * Data sensoru
      * 
-     * Properties: id	device_id	channel_id	name	device_class	value_type	msg_rate	desc	display_nodata_interval	 preprocess_data	preprocess_factor dev_name	dev_desc
+     * Properties: id	device_id	channel_id	name	device_class	id_value_types	msg_rate	desc	display_nodata_interval	 preprocess_data	preprocess_factor dev_name	dev_desc
      */
     public $firstSensor;
 
@@ -49,9 +49,9 @@ class SensorDataSeries
      * Vyplni, zda je propojen s predeslym nebo neni.
      * Nastavuje max/min hodnoty v serii.
      */
-    public function pushPoint( ChartPoint $point, $dailySum=FALSE )
+    public function pushPoint(ChartPoint $point, $dailySum = FALSE)
     {
-        if( is_null($point->value) ) {
+        if (is_null($point->value)) {
             return;
         }
 
@@ -59,20 +59,20 @@ class SensorDataSeries
 
         $maxDiff = $dailySum ? 180000 : $this->firstSensor->display_nodata_interval;
 
-        if( $this->prevPointTime != NULL ) {
+        if ($this->prevPointTime != NULL) {
             // pokud existuje predesly bod a je casove bliz nez zobrazovaci limit, oznacime si, ze je propojen
-            if( ($point->relativeTime - $this->prevPointTime ) < $maxDiff ) {
-                $point->connectedFromPrevious = TRUE;    
+            if (($point->relativeTime - $this->prevPointTime) < $maxDiff) {
+                $point->connectedFromPrevious = TRUE;
             }
-        } 
+        }
 
-        if( $this->minVal===NULL || $point->value < $this->minVal ) {
+        if ($this->minVal === NULL || $point->value < $this->minVal) {
             $this->minVal = $point->value;
-        } 
+        }
 
-        if( $this->maxVal===NULL || $point->value > $this->maxVal ) {
+        if ($this->maxVal === NULL || $point->value > $this->maxVal) {
             $this->maxVal = $point->value;
-        } 
+        }
 
         $this->prevPointTime = $point->relativeTime;
         $this->points[] = $point;
@@ -80,9 +80,9 @@ class SensorDataSeries
         // Debugger::log( ' + ' . $point->toString() );
     }
 
-    
 
-    public function __construct( $sensor )
+
+    public function __construct($sensor)
     {
         $this->firstSensor = $sensor;
         $this->points = array();
@@ -94,18 +94,18 @@ class SensorDataSeries
     /**
      * Pocet zaznamu v poli
      */
-    public function size() : int
+    public function size(): int
     {
         return sizeof($this->points);
     }
 
-    public function toString( $verbose = FALSE ) : string
+    public function toString($verbose = FALSE): string
     {
-        $rc = "SensorDataSeries [sensor {$this->firstSensor->id} '{$this->firstSensor->dev_name}:{$this->firstSensor->name}'; ct={$this->size()}" ;
+        $rc = "SensorDataSeries [sensor {$this->firstSensor->id} '{$this->firstSensor->dev_name}:{$this->firstSensor->name}'; ct={$this->size()}";
         $rc .= " min={$this->minVal} max={$this->maxVal}";
-        if( $verbose ) {
+        if ($verbose) {
             $rc .= "; data:";
-            foreach( $this->points as $point ) {
+            foreach ($this->points as $point) {
                 $rc .= ' ' . $point->toString();
             }
         }
@@ -113,8 +113,4 @@ class SensorDataSeries
 
         return $rc;
     }
-
 }
-
-
-
