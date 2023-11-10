@@ -489,7 +489,7 @@ final class RaPresenter extends Nette\Application\UI\Presenter
             $this->template->result = "OK";
         } catch (\App\Exceptions\NoSessionException $e) {
 
-            $logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+            $logger->write(Logger::ERROR,  "ERR_01(fu:actionLog): " . get_class($e) . ": " . $e->getMessage());
 
             $httpResponse = $this->getHttpResponse();
             $httpResponse->setCode(Nette\Http\Response::S403_Forbidden);
@@ -501,7 +501,7 @@ final class RaPresenter extends Nette\Application\UI\Presenter
 
             //TODO: zapsat chybu do tabulky chyb
 
-            $logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+            $logger->write(Logger::ERROR,  "ERR_02(fu:actionLog): " . get_class($e) . ": " . $e->getMessage());
 
             $httpResponse = $this->getHttpResponse();
             $httpResponse->setCode(Nette\Http\Response::S400_BadRequest);
@@ -577,7 +577,7 @@ final class RaPresenter extends Nette\Application\UI\Presenter
             $this->template->result = "OK";
         } catch (\App\Exceptions\NoSessionException $e) {
 
-            $logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+            $logger->write(Logger::ERROR,  "ERR_01(fu:actionData): " . get_class($e) . ": " . $e->getMessage());
 
             $httpResponse = $this->getHttpResponse();
             $httpResponse->setCode(Nette\Http\Response::S403_Forbidden);
@@ -589,7 +589,7 @@ final class RaPresenter extends Nette\Application\UI\Presenter
 
             //TODO: zapsat chybu do tabulky chyb
 
-            $logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+            $logger->write(Logger::ERROR,  "ERR_02(fu:actionData): " . get_class($e) . ": " . $e->getMessage());
 
             $httpResponse = $this->getHttpResponse();
             $httpResponse->setCode(Nette\Http\Response::S400_BadRequest);
@@ -724,7 +724,7 @@ final class RaPresenter extends Nette\Application\UI\Presenter
             $this->template->result = "OK";
         } catch (\App\Exceptions\NoSessionException $e) {
 
-            $logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+            $logger->write(Logger::ERROR,  "ERR_01(fu:actionBlob): " . get_class($e) . ": " . $e->getMessage());
 
             $httpResponse = $this->getHttpResponse();
             $httpResponse->setCode(Nette\Http\Response::S403_Forbidden);
@@ -736,7 +736,7 @@ final class RaPresenter extends Nette\Application\UI\Presenter
 
             //TODO: zapsat chybu do tabulky chyb
 
-            $logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+            $logger->write(Logger::ERROR,  "ERR_02(fu:actionBlob): " . get_class($e) . ": " . $e->getMessage());
 
             $httpResponse = $this->getHttpResponse();
             $httpResponse->setCode(Nette\Http\Response::S400_BadRequest);
@@ -806,7 +806,7 @@ final class RaPresenter extends Nette\Application\UI\Presenter
             throw $e;
         } catch (\App\Exceptions\NoSessionException $e) {
 
-            $logger->write(Logger::ERROR,  "ERR: " . get_class($e) . ": " . $e->getMessage());
+            $logger->write(Logger::ERROR,  "ERR_01(fu:actionUpdate): " . get_class($e) . ": " . $e->getMessage());
 
             $httpResponse = $this->getHttpResponse();
             $httpResponse->setCode(Nette\Http\Response::S403_Forbidden);

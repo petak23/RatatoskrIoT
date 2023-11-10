@@ -157,17 +157,17 @@ class RaDataSource
     {
         $session = $this->database->fetch('SELECT hash, device_id, started, session_key FROM prelogin WHERE id = ?', $sessionId);
         if ($session == NULL) {
-            throw new \App\Exceptions\NoSessionException("session {$sessionId} not found");
+            throw new \App\Exceptions\NoSessionException("(fu: checkLoginSession) - session {$sessionId} not found");
         }
 
         if (strcmp($session->hash, $sessionHash) != 0) {
-            throw new \App\Exceptions\NoSessionException("bad hash");
+            throw new \App\Exceptions\NoSessionException("(fu: checkLoginSession) - bad hash");
         }
 
         $now = new DateTime;
         // zivotnost session 1 den
         if ($now->diff($session->started)->i > 5) {
-            throw new \App\Exceptions\NoSessionException("session expired");
+            throw new \App\Exceptions\NoSessionException("(fu: checkLoginSession) - session expired");
         }
 
         $rc = new \App\Model\SessionDevice();
@@ -187,19 +187,19 @@ class RaDataSource
      */
     public function checkSession($sessionId, $sessionHash)
     {
-        $session = $this->database->fetch('SELECT hash, device_id, started, session_key FROM sessions WHERE id = ?', $sessionId);
+        $session = $this->database->fetch('SELECT hash, device_id, started, session_key FROM sessions WHERE id = ?', (int)$sessionId);
         if ($session == NULL) {
-            throw new \App\Exceptions\NoSessionException("session {$sessionId} not found");
+            throw new \App\Exceptions\NoSessionException("(fu: checkSession) - session " . (int)$sessionId . " not found");
         }
 
         if (strcmp($session->hash, $sessionHash) != 0) {
-            throw new \App\Exceptions\NoSessionException("bad hash");
+            throw new \App\Exceptions\NoSessionException("(fu: checkSession) - bad hash");
         }
 
         $now = new DateTime;
         // zivotnost session 1 den
         if ($now->diff($session->started)->days > 0) {
-            throw new \App\Exceptions\NoSessionException("session expired");
+            throw new \App\Exceptions\NoSessionException("(fu: checkSession) - session expired");
         }
 
         $rc = new \App\Model\SessionDevice();
