@@ -30,6 +30,9 @@ const store = useMainStore()
 						<RouterLink to="/" class="nav-link">Home</RouterLink>
 					</li>
 					<li class="nav-item">
+						<RouterLink to="/devices" class="nav-link">Zariadenia</RouterLink>
+					</li>
+					<li class="nav-item">
 						<RouterLink to="/units" class="nav-link">Jednotky</RouterLink>
 					</li>
 				</ul>
