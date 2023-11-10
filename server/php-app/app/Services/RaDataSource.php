@@ -15,11 +15,11 @@ class RaDataSource
 {
     use Nette\SmartObject;
 
-    /** @var Nette\Database\Context */
+    /** @var Nette\Database\Explorer */
     private $database;
 
     public function __construct(
-        Nette\Database\Context $database
+        Nette\Database\Explorer $database
     ) {
         $this->database = $database;
     }
