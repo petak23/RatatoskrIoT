@@ -404,6 +404,7 @@ class InventoryDataSource
 
 	public function deleteSession($id)
 	{
+		Logger::log('webapp', Logger::DEBUG,  "(fu: deleteSession) Mazu session device {$id}");
 		$this->database->query('
 			DELETE from sessions
 			WHERE device_id = ?
@@ -413,7 +414,7 @@ class InventoryDataSource
 
 	public function deleteDevice($id)
 	{
-		Logger::log('webapp', Logger::DEBUG,  "Mazu session device {$id}");
+		Logger::log('webapp', Logger::DEBUG,  "(fu: deleteDevice) Mazu session device {$id}");
 
 		// nejprve zmenit heslo a smazat session, aby se uz nemohlo prihlasit
 		$this->database->query("
