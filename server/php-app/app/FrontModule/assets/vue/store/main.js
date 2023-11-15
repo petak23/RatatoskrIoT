@@ -7,8 +7,7 @@ export const useMainStore = defineStore('main', () => {
   function increment() {
     count.value++
   }*/
-
-	const baseUrl = ref("")
+	const baseUrl = ref(document.getElementById('app').dataset.baseUrl)
 
 	const apiPath = computed(() => baseUrl.value + "api/") // Cesta k API
 
@@ -20,5 +19,7 @@ export const useMainStore = defineStore('main', () => {
 			
 	const minYear = ref(2000)
 
-  return { baseUrl, apiPath, appName, links, dataRetentionDays, minYear }
+	const user = ref(null)
+
+  return { baseUrl, apiPath, appName, links, dataRetentionDays, minYear, user }
 })

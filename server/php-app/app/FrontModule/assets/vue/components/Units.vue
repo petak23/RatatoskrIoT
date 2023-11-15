@@ -1,12 +1,9 @@
 <script>
 import { onMounted, ref } from 'vue'
-import { useMainStore } from '../store/main'
-import axios from 'axios'
+import MainService from '../services/MainService'
 
 export default {
 	setup () {
-
-		const store = useMainStore()
 
 		const items = ref(null)
 
@@ -15,14 +12,11 @@ export default {
 		}) 
 
 		const getUnits = () => {
-			let odkaz = store.apiPath + 'units'
-			axios.get(odkaz)
+			MainService.getUnits()
 				.then(response => {
-					//console.log(response.data)
 					items.value = response.data
 				})
 				.catch((error) => {
-					console.log(odkaz);
 					console.log(error);
 				});
 		}
@@ -33,9 +27,6 @@ export default {
 </script>
 
 <template>
-	<div class="col-12 h1">
-		<h1>Jednotky</h1>
-	</div>
 	<div v-if="items != null" class="col-12 table">
 		<table>
 			<tr>

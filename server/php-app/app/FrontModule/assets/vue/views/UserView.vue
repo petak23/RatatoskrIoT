@@ -1,10 +1,10 @@
 <script setup>
-import Units from '../components/Units.vue'
+import User from '../components/User.vue'
 </script>
 
 <template>
 	<div class="col-12 h1">
-		<h1>Jednotky</h1>
+		<h1>Môj účet:</h1>
 	</div>
-	<units />
+	<user />
 </template>

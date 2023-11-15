@@ -5,6 +5,7 @@ import { useMainStore } from './store/main'
 import { RouterLink, RouterView } from 'vue-router'
 
 const store = useMainStore()
+
 </script>
 
 <template>
@@ -13,7 +14,7 @@ const store = useMainStore()
 		<button class="btn btn-link btn-sm ml-2 mr-2" id="sidebarToggle" href="#">
 			<i class="fas fa-bars"></i>
 		</button>
-		<a class="navbar-brand" :href="store.baseUrl" :title="store.appName">
+		<a class="navbar-brand" :href="baseUrl" :title="store.appName">
 			{{ store.appName }}
 		</a>
 	</nav>
@@ -24,10 +25,13 @@ const store = useMainStore()
 				<div class="h6">Menu</div>
 				<ul class="nav flex-column">
 					<li class="nav-item">
-						<a class="nav-link pt-0 pb-1" :href="store.baseUrl">Späť na hlavnú stránku</a>
+						<a class="nav-link" :href="baseUrl">Späť na hlavnú stránku</a>
 					</li>
 					<li class="nav-item">
-						<RouterLink to="/" class="nav-link">Home</RouterLink>
+						<RouterLink to="/" class="nav-link">Základý prehľad</RouterLink>
+					</li>
+					<li class="nav-item">
+						<RouterLink to="/user" class="nav-link">Môj účet</RouterLink>
 					</li>
 					<li class="nav-item">
 						<RouterLink to="/devices" class="nav-link">Zariadenia</RouterLink>
@@ -48,5 +52,14 @@ const store = useMainStore()
 </template>
 
 <style scoped>
-
+.nav-item {
+	border-bottom: 1px solid #dadada;
+}
+.nav-item:last-child {
+	border-bottom: 0;
+}
+.nav-link {
+	padding-top: 0;
+	padding-bottom: 0;
+}
 </style>

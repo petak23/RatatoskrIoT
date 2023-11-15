@@ -1,16 +1,12 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useMainStore } from '../store/main'
-import axios from 'axios'
+import MainService from '../services/MainService';
 
 const store = useMainStore()
 
 const getMySettings = () => {
-	store.baseUrl = document.getElementById('app').dataset.baseUrl + "/"
-	//console.log(dataset)
-	let odkaz = store.apiPath + 'homepage/myappsettings'
-
-	axios.get(odkaz)
+	MainService.getMySettings()
 		.then(response => {
 			//console.log(response.data)
 			store.appName = response.data.appName
@@ -19,12 +15,22 @@ const getMySettings = () => {
 			store.minYear = response.data.minYear
 		})
 		.catch((error) => {
-			console.log(odkaz);
 			console.log(error);
-		});
+		})
+}
+
+const getActualUser = () => {
+	MainService.getMyUserData()
+		.then(response => {
+			store.user = response.data
+		})
+		.catch((error) => {
+			console.log(error);
+		})
 }
 
 onMounted(() => {
 	getMySettings();
+	getActualUser();
 })
 </script>

@@ -6,7 +6,7 @@ namespace App\ApiModule\Presenters;
 
 /**
  * Prezenter pre pristup k api užívateľov.
- * Posledna zmena(last change): 28.09.2023
+ * Posledna zmena(last change): 15.11.2023
  *
  * Modul: API
  *
@@ -14,7 +14,7 @@ namespace App\ApiModule\Presenters;
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version 1.0.1
+ * @version 1.0.2
  */
 class UsersPresenter extends BasePresenter
 {
@@ -28,8 +28,18 @@ class UsersPresenter extends BasePresenter
 		$this->sendJson($this->user_main->getUsers(true));
 	}
 
+	/**
+	 * Vráti konkrétneho užívateľa. Ak je id = 0 vráti aktuálne prihláseného užívateľa
+	 */
 	public function actionUser(int $id = 0): void
 	{
-		$this->sendJson($this->user_main->getUser($id, true));
+		$this->sendJson(
+			$this->user_main->getUser(
+				($id == 0) ? $this->user->getId() : $id,
+				$this->user,
+				$this->template->baseUrl,
+				true
+			)
+		);
 	}
 }

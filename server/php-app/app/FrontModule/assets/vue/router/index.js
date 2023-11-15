@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import HomePageView from '../views/HomePageView.vue'
+import UserView from '../views/UserView.vue'
 import DevicesView from '../views/DevicesView.vue'
 import UnitsView from '../views/UnitsView.vue'
 import { useMainStore } from '../store/main'
@@ -8,7 +9,12 @@ const routes = [
 	{
 		path: '/',
 		name: 'Domov',
-		component: HomeView
+		component: HomePageView
+	},
+	{
+		path: '/user',
+		name: 'Môj účet',
+		component: UserView
 	},
 	{
 		path: '/devices',

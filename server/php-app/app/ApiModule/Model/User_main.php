@@ -8,6 +8,8 @@ use App\Exceptions;
 
 use Nette;
 use Nette\Database;
+use Nette\Http\Url;
+use Nette\Security\User;
 use Nette\Utils\ArrayHash;
 use Nette\Utils\Random;
 
@@ -15,13 +17,13 @@ use Nette\Utils\Random;
 /**
  * Model, ktory sa stara o tabulku user_main
  * 
- * Posledna zmena 23.09.2023
+ * Posledna zmena 15.11.2023
  * 
  * @author     Ing. Peter VOJTECH ml. <petak23@gmail.com>
  * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version    1.0.8
+ * @version    1.0.9
  */
 class User_main extends Table
 {
@@ -71,7 +73,7 @@ class User_main extends Table
 	 * Nájdenie info o jednom užívateľovy
 	 * @param int $id primary key
 	 * @return Database\Table\ActiveRow|array */
-	public function getUser(int $id, bool $return_as_array = false): Database\Table\ActiveRow|array
+	public function getUser(int $id, User $user = null, String $baseUrl = "", bool $return_as_array = false): Database\Table\ActiveRow|array
 	{
 		$out = $this->find($id);
 		if ($out == null) return ['error' => "User not found", 'error_n' => 1, 'user_id' => $id];
@@ -85,6 +87,24 @@ class User_main extends Table
 					$_user[$v['field']] = $out->{$v['field']};
 				}
 			}
+			if ($_user['prev_login_ip'] != NULL) {
+				$_user['prev_login_name'] = gethostbyaddr($_user['prev_login_ip']);
+				if ($_user['prev_login_name'] === $_user['prev_login_ip']) {
+					$_user['prev_login_name'] = NULL;
+				}
+			}
+			if ($_user['last_error_ip'] != NULL) {
+				$_user['last_error_name'] = gethostbyaddr($_user['last_error_ip']);
+				if ($_user['last_error_name'] === $_user['last_error_ip']) {
+					$_user['last_error_name'] = NULL;
+				}
+			}
+			if ($user != null) {
+				$_user['monitoringUrl'] = $baseUrl . "monitor/show/" . $_user['monitoring_token'] . "}/" . $user->getId() . "/";
+			} else {
+				$_user['monitoringUrl'] = null;
+			}
+
 			$out = $_user;
 		}
 		return $out;
