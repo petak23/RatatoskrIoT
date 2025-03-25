@@ -38,7 +38,7 @@ export default {
 					<th>Meno</th>
 					<td v-for="(id, unit) in items" :key="id">{{ unit }}</td>
 				</tr>
-			</tbody>
+			</tbody>	
 		</table>
 	</div>
 </template>
