@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePageView from '../views/HomePageView.vue'
 import UserView from '../views/UserView.vue'
 import DevicesView from '../views/DevicesView.vue'
+import DeviceView from '../views/DeviceView.vue'
 import UnitsView from '../views/UnitsView.vue'
 import { useMainStore } from '../store/main'
 
@@ -20,6 +21,12 @@ const routes = [
 		path: '/devices',
 		name: 'Zariadenia',
 		component: DevicesView
+	},
+	{
+		path: '/device/:id',
+		name: 'Zariadenie',
+		props: true,
+		component: DeviceView
 	},
 	{
 		path: '/units',

@@ -29,14 +29,16 @@ export default {
 <template>
 	<div v-if="items != null" class="col-12 table">
 		<table>
-			<tr>
-				<th>Id</th>
-				<td v-for="(id) in items" :key="id">{{ id }}</td>
-			</tr>
-			<tr>
-				<th>Meno</th>
-				<td v-for="(id, unit) in items" :key="id">{{ unit }}</td>
-			</tr>
+			<tbody>
+				<tr>
+					<th>Id</th>
+					<td v-for="(id) in items" :key="id">{{ id }}</td>
+				</tr>
+				<tr>
+					<th>Meno</th>
+					<td v-for="(id, unit) in items" :key="id">{{ unit }}</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
 </template>

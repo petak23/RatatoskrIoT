@@ -102,8 +102,39 @@ module.exports = {
 					filename: 'imgs/[hash:5][ext][query]'
 				},
 			},
-			{
-				test: /\.(css|scss)$/,
+			/*{
+				test: /\.s[ac]ss$/i,
+				use: [
+					MiniCssExtractPlugin.loader,
+				  //"style-loader",
+					{
+						loader: 'css-loader',
+						options: {
+							sourceMap: false,
+							importLoaders: 2,
+							modules: false
+						}
+					},
+					{
+						loader: "postcss-loader",
+						options: {
+							postcssOptions: {
+								ident: "postcss",
+								plugins: [require("autoprefixer")]
+							}
+						}
+					},
+					{
+						loader: "sass-loader",
+						options: {
+							// Prefer `dart-sass`, even if `sass-embedded` is available
+							implementation: require("sass"),
+						},
+					},
+				],
+			},*/
+			/*{
+				test: /\.(css|scss|sass)$/,
 				use: [
 					MiniCssExtractPlugin.loader,
 					{
@@ -126,13 +157,15 @@ module.exports = {
 					{
 						loader: 'sass-loader',
 						options: {
+							//api: "modern-compiler",
+							implementation: require('sass'),
 							// This is the path to your variables
-							additionalData: "@import '@/css/scss/variables.scss';"
+							//additionalData: "@import '@/front/css/scss/variables.scss';"
 						},
 					},
 				],
-			},
-			{
+			},*/
+			/*{
 				test: /\.sass$/,
 				use: [
 					MiniCssExtractPlugin.loader,
@@ -156,8 +189,42 @@ module.exports = {
 					{
 						loader: 'sass-loader',
 						options: {
+							implementation: require('sass'),
 							// This is the path to your variables
-							additionalData: "@import '@/css/scss/variables.scss'"
+							//additionalData: "@import '@/front/css/scss/variables.scss'"
+						},
+					},
+				],
+			},*/
+			{
+				test: /\.(css|scss|sass)$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					{
+						loader: 'css-loader',
+						options: {
+							sourceMap: false, // Vypnuté zdrojové mapy pre produkciu, zapni ich, ak sú potrebné
+							importLoaders: 2, // Umožňuje načítanie predchádzajúcich loaderov
+							modules: false, // Ak nepoužívaš CSS Modules, nechaj false
+						},
+					},
+					{
+						loader: 'postcss-loader',
+						options: {
+							postcssOptions: {
+								ident: 'postcss',
+								plugins: [require('autoprefixer')], // Autoprefixer pre kompatibilitu s prehliadačmi
+							},
+						},
+					},
+					{
+						loader: 'sass-loader',
+						options: {
+							implementation: require('sass'), // Používať `dart-sass`
+							sourceMap: false, // Môžeš zapnúť pre debugovanie
+							additionalData: `
+								@use "@/front/css/scss/variables.scss" as *; 
+							`,// Globálne premenné
 						},
 					},
 				],
@@ -176,16 +243,6 @@ module.exports = {
 		new VueLoaderPlugin(),
 
 		//new VuetifyLoaderPlugin(),
-		
-		// fix legacy jQuery plugins which depend on globals
-		/*new webpack.ProvidePlugin({
-			$: "jquery",
-			jQuery: "jquery",
-			"window.jQuery": "jquery",
-			"window.$": "jquery",
-			Popper: ["popper.js", "default"],
-			//naja: ['naja', 'default'],  // https://forum.nette.org/cs/25444-ublaboo-datagrid-mocny-rychly-rozsiritelny-hezky-anglicky-dokumentovany-datagrid?p=36#p213906
-		}),*/
 		
 		new MiniCssExtractPlugin({
 			filename: devMode ? '[name].bundle.css' : '[name].[chunkhash:8].bundle.css'

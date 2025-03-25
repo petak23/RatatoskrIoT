@@ -54,6 +54,7 @@ const store = useMainStore()
 <style scoped>
 .nav-item {
 	border-bottom: 1px solid #dadada;
+	background-color: #eeeeee;
 }
 .nav-item:last-child {
 	border-bottom: 0;
@@ -61,5 +62,19 @@ const store = useMainStore()
 .nav-link {
 	padding-top: 0;
 	padding-bottom: 0;
+	color: #535363;
+}
+.nav-link:hover {
+	color: #131313;
+}
+.router-link-active {
+	background-color: #deb887;
+	color: #393939 !important;
+}
+.router-link-active:hover {
+	color: #131313;
+}
+.router-link-exact-active {
+	background-color: #f1a43e;
 }
 </style>

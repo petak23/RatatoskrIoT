@@ -21,5 +21,39 @@ export const useMainStore = defineStore('main', () => {
 
 	const user = ref(null)
 
-  return { baseUrl, apiPath, appName, links, dataRetentionDays, minYear, user }
+	const main_menu = ref([
+		/*{
+			view_in_main_menu: true,
+			path: '/',
+			name: 'Domov',
+			component: HomePageView
+		},
+		{
+			view_in_main_menu: true,
+			path: '/user',
+			name: 'Môj účet',
+			component: UserView
+		},
+		{
+			view_in_main_menu: true,
+			path: '/devices',
+			name: 'Zariadenia',
+			component: DevicesView
+		},
+		{
+			view_in_main_menu: false,
+			path: '/device/:id',
+			name: 'Zariadenie',
+			props: true,
+			component: DeviceView
+		},
+		{
+			view_in_main_menu: true,
+			path: '/units',
+			name: 'Jednotky',
+			component: UnitsView
+		}*/
+	])
+
+  return { baseUrl, apiPath, appName, links, dataRetentionDays, minYear, user, main_menu }
 })

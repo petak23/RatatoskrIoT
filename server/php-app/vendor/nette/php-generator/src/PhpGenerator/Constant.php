@@ -9,15 +9,12 @@ declare(strict_types=1);
 
 namespace Nette\PhpGenerator;
 
-use Nette;
-
 
 /**
- * Class constant.
+ * Definition of a class constant.
  */
 final class Constant
 {
-	use Nette\SmartObject;
 	use Traits\NameAware;
 	use Traits\VisibilityAware;
 	use Traits\CommentAware;
@@ -56,7 +53,8 @@ final class Constant
 
 	public function setType(?string $type): static
 	{
-		$this->type = Helpers::validateType($type);
+		Helpers::validateType($type);
+		$this->type = $type;
 		return $this;
 	}
 

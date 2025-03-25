@@ -19,6 +19,9 @@ export default {
 	getDevices() {
 		return apiClient.get('devices')
 	},
+	getDevice(id_device) {
+		return apiClient.get('device/' + id_device)
+	},
 	getUnits() {
 		return apiClient.get('units')
 	},

@@ -1,5 +1,5 @@
 <script setup>
-import Devices_overview from '../components/homepage/Devices_overview.vue';
+import Devices_overview from '../components/Devices/Devices_overview.vue';
 import User_overview from '../components/homepage/User_overview.vue';
 </script>
 

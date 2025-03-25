@@ -13,7 +13,7 @@ class BasePresenter extends Nette\Application\UI\Presenter
 {
 	use Nette\SmartObject;
 	use PeterVojtech\MainLayout\Favicon\faviconTrait;
-	use PeterVojtech\MainLayout\GoogleAnalytics\googleAnalyticsTrait;
+	//use PeterVojtech\MainLayout\GoogleAnalytics\googleAnalyticsTrait;
 
 	public function checkUserRole($reqRole)
 	{

@@ -13,6 +13,8 @@ parameters:
 		#	Musi obsahovat polia: 'id' a 'acronym'(skratka)
 		#langs_db_table: 'lang' # null # 
 
+#	ua_code: UA_123456
+
 application:
 	errorPresenter: Error
 	mapping:
@@ -45,7 +47,7 @@ services:
 	- App\Model\PV_User_main
 
 	- PeterVojtech\MainLayout\Favicon\IFaviconControl
-	- PeterVojtech\MainLayout\GoogleAnalytics\GoogleAnalyticsControl( %ua_code% )
+#	- PeterVojtech\MainLayout\GoogleAnalytics\GoogleAnalyticsControl( %ua_code% )
 	- Language_support\LanguageMain(%language_support%)
 	security.passwords: Nette\Security\Passwords(::PASSWORD_BCRYPT, [cost: 11])		# zde se nastavuji pozadovane parametry hesla https://doc.nette.org/cs/3.0/passwords
 	router: App\Router\RouterFactory::createRouter
@@ -91,13 +93,13 @@ includes:
 	- ../FrontModule/config/config.neon
 
 extensions:
-  webpack: Contributte\Webpack\DI\WebpackExtension(%debugMode%, %consoleMode%)
+	webpack: Contributte\Webpack\DI\WebpackExtension(%debugMode%, %consoleMode%)
 
 webpack:
-  build:
-    directory: %wwwDir%/dist
-    publicPath: dist/
-  # devServer - tato cast je presunuta do config.local.neon
-  manifest:  # Cez tento subor je prepojenie na filename: '[name].[contenthash:8].[ext]' vo webpack-u
-    name: manifest.json  # ./www/dist/manifest.json
+	build:
+		directory: %wwwDir%/dist
+		publicPath: dist/
+	# devServer - tato cast je presunuta do config.local.neon
+	manifest:  # Cez tento subor je prepojenie na filename: '[name].[contenthash:8].[ext]' vo webpack-u
+		name: manifest.json  # ./www/dist/manifest.json
 #    mapper: Contributte\Webpack\Manifest\Mapper\AssetsWebpackPluginMapper

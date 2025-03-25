@@ -1,5 +1,5 @@
 <script setup>
-import Devices from '../components/Devices.vue'
+import Devices from '../components/Devices/Devices'
 </script>
 
 <template>

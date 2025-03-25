@@ -18,8 +18,6 @@ use Nette\Utils\Reflection;
  */
 final class Factory
 {
-	use Nette\SmartObject;
-
 	/** @var string[][]  */
 	private array $bodyCache = [];
 
@@ -31,14 +29,10 @@ final class Factory
 	public function fromClassReflection(
 		\ReflectionClass $from,
 		bool $withBodies = false,
-		?bool $materializeTraits = null,
 	): ClassLike
 	{
-		if ($materializeTraits !== null) {
-			trigger_error(__METHOD__ . '() parameter $materializeTraits has been removed (is always false).', E_USER_DEPRECATED);
-		}
-		if ($withBodies && $from->isAnonymous()) {
-			throw new Nette\NotSupportedException('The $withBodies parameter cannot be used for anonymous functions.');
+		if ($withBodies && ($from->isAnonymous() || $from->isInternal())) {
+			throw new Nette\NotSupportedException('The $withBodies parameter cannot be used for anonymous or internal classes.');
 		}
 
 		$enumIface = null;
@@ -107,7 +101,7 @@ final class Factory
 				$methods[] = $m = $this->fromMethodReflection($method);
 				if ($withBodies) {
 					$bodies = &$this->bodyCache[$declaringClass->name];
-					$bodies ??= $this->getExtractor($declaringClass)->extractMethodBodies($declaringClass->name);
+					$bodies ??= $this->getExtractor($declaringClass->getFileName())->extractMethodBodies($declaringClass->name);
 					if (isset($bodies[$declaringMethod->name])) {
 						$m->setBody($bodies[$declaringMethod->name]);
 					}
@@ -183,11 +177,11 @@ final class Factory
 		$function->setReturnType((string) $from->getReturnType());
 
 		if ($withBody) {
-			if ($from->isClosure()) {
-				throw new Nette\NotSupportedException('The $withBody parameter cannot be used for closures.');
+			if ($from->isClosure() || $from->isInternal()) {
+				throw new Nette\NotSupportedException('The $withBody parameter cannot be used for closures or internal functions.');
 			}
 
-			$function->setBody($this->getExtractor($from)->extractFunctionBody($from->name));
+			$function->setBody($this->getExtractor($from->getFileName())->extractFunctionBody($from->name));
 		}
 
 		return $function;
@@ -205,9 +199,15 @@ final class Factory
 
 	public function fromParameterReflection(\ReflectionParameter $from): Parameter
 	{
-		$param = $from->isPromoted()
-			? new PromotedParameter($from->name)
-			: new Parameter($from->name);
+		if ($from->isPromoted()) {
+			$property = $from->getDeclaringClass()->getProperty($from->name);
+			$param = (new PromotedParameter($from->name))
+				->setVisibility($this->getVisibility($property))
+				->setReadOnly(PHP_VERSION_ID >= 80100 && $property->isReadonly());
+			$this->addHooks($property, $param);
+		} else {
+			$param = new Parameter($from->name);
+		}
 		$param->setReference($from->isPassedByReference());
 		$param->setType((string) $from->getType());
 
@@ -224,8 +224,6 @@ final class Factory
 			} else {
 				$param->setDefaultValue($from->getDefaultValue());
 			}
-
-			$param->setNullable($param->isNullable() && $param->getDefaultValue() !== null);
 		}
 
 		$param->setAttributes($this->getAttributes($from));
@@ -238,7 +236,7 @@ final class Factory
 		$const = new Constant($from->name);
 		$const->setValue($from->getValue());
 		$const->setVisibility($this->getVisibility($from));
-		$const->setFinal(PHP_VERSION_ID >= 80100 ? $from->isFinal() : false);
+		$const->setFinal(PHP_VERSION_ID >= 80100 && $from->isFinal());
 		$const->setComment(Helpers::unformatDocComment((string) $from->getDocComment()));
 		$const->setAttributes($this->getAttributes($from));
 		return $const;
@@ -263,12 +261,55 @@ final class Factory
 		$prop->setStatic($from->isStatic());
 		$prop->setVisibility($this->getVisibility($from));
 		$prop->setType((string) $from->getType());
-
 		$prop->setInitialized($from->hasType() && array_key_exists($prop->getName(), $defaults));
-		$prop->setReadOnly(PHP_VERSION_ID >= 80100 && $from->isReadOnly() && !(PHP_VERSION_ID >= 80200 && $from->getDeclaringClass()->isReadOnly()));
+		$prop->setReadOnly(PHP_VERSION_ID >= 80100 && $from->isReadOnly());
 		$prop->setComment(Helpers::unformatDocComment((string) $from->getDocComment()));
 		$prop->setAttributes($this->getAttributes($from));
+
+		if (PHP_VERSION_ID >= 80400) {
+			$this->addHooks($from, $prop);
+			$isInterface = $from->getDeclaringClass()->isInterface();
+			$prop->setFinal($from->isFinal() && !$prop->isPrivate(PropertyAccessMode::Set));
+			$prop->setAbstract($from->isAbstract() && !$isInterface);
+		}
 		return $prop;
+	}
+
+
+	private function addHooks(\ReflectionProperty $from, Property|PromotedParameter $prop): void
+	{
+		if (PHP_VERSION_ID < 80400) {
+			return;
+		}
+
+		$getV = $this->getVisibility($from);
+		$setV = $from->isPrivateSet()
+			? Visibility::Private
+			: ($from->isProtectedSet() ? Visibility::Protected : $getV);
+		$defaultSetV = $from->isReadOnly() && $getV !== Visibility::Private
+			? Visibility::Protected
+			: $getV;
+		if ($setV !== $defaultSetV) {
+			$prop->setVisibility($getV === Visibility::Public ? null : $getV, $setV);
+		}
+
+		foreach ($from->getHooks() as $type => $hook) {
+			$params = $hook->getParameters();
+			if (
+				count($params) === 1
+				&& $params[0]->getName() === 'value'
+				&& $params[0]->getType() == $from->getType() // intentionally ==
+			) {
+				$params = [];
+			}
+			$prop->addHook($type)
+				->setParameters(array_map([$this, 'fromParameterReflection'], $params))
+				->setAbstract($hook->isAbstract())
+				->setFinal($hook->isFinal())
+				->setReturnReference($hook->returnsReference())
+				->setComment(Helpers::unformatDocComment((string) $hook->getDocComment()))
+				->setAttributes($this->getAttributes($hook));
+		}
 	}
 
 
@@ -310,21 +351,15 @@ final class Factory
 	private function getVisibility($from): string
 	{
 		return $from->isPrivate()
-			? ClassLike::VisibilityPrivate
-			: ($from->isProtected() ? ClassLike::VisibilityProtected : ClassLike::VisibilityPublic);
+			? Visibility::Private
+			: ($from->isProtected() ? Visibility::Protected : Visibility::Public);
 	}
 
 
-	private function getExtractor($from): Extractor
+	private function getExtractor(string $file): Extractor
 	{
-		$file = $from->getFileName();
 		$cache = &$this->extractorCache[$file];
-		if ($cache !== null) {
-			return $cache;
-		} elseif (!$file) {
-			throw new Nette\InvalidStateException("Source code of $from->name not found.");
-		}
-
-		return new Extractor(file_get_contents($file));
+		$cache ??= new Extractor(file_get_contents($file));
+		return $cache;
 	}
 }
