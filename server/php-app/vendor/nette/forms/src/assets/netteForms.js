@@ -441,7 +441,7 @@
 			var parts = typeof arg === 'string' ? arg.match(/^\/(.*)\/([imu]*)$/) : false;
 			try {
 				return parts && (new RegExp(parts[1], parts[2].replace('u', ''))).test(val);
-			} catch (e) {} // eslint-disable-line no-empty
+			} catch (e) {}  
 		},
 
 		pattern: function(elem, arg, val, value, caseInsensitive) {
@@ -467,7 +467,7 @@
 				}
 
 				return regExp.test(val);
-			} catch (e) {} // eslint-disable-line no-empty
+			} catch (e) {}  
 		},
 
 		patternCaseInsensitive: function(elem, arg, val) {
@@ -644,7 +644,7 @@
 	/**
 	 * Displays or hides HTML element.
 	 */
-	Nette.toggle = function(selector, visible, srcElement, event) { // eslint-disable-line no-unused-vars
+	Nette.toggle = function(selector, visible, srcElement, event) {  
 		if (/^\w[\w.:-]*$/.test(selector)) { // id
 			selector = '#' + selector;
 		}
@@ -675,7 +675,7 @@
 					elem.setAttribute('data-nette-name', name);
 				}
 
-				if (name = elem.getAttribute('data-nette-name')) { // eslint-disable-line no-cond-assign
+				if (name = elem.getAttribute('data-nette-name')) {  
 					values[name] = values[name] || [];
 					if (elem.checked && !elem.disabled) {
 						values[name].push(elem.value);

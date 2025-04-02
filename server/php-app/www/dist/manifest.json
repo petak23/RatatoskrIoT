@@ -1,4 +1,13 @@
 {
+  "front.css": "front.bundle.css",
   "front.js": "front.bundle.js",
+  "fonts/fa-solid-900.ttf": "fonts/2582b0e4bcf85eceead0.ttf",
+  "fonts/fa-brands-400.ttf": "fonts/1815e00441357e01619e.ttf",
+  "fonts/fa-solid-900.woff2": "fonts/2463b90d9a316e4e5294.woff2",
+  "fonts/fa-brands-400.woff2": "fonts/c210719e60948b211a12.woff2",
+  "fonts/fa-regular-400.ttf": "fonts/914997e1bdfc990d0897.ttf",
+  "fonts/fa-regular-400.woff2": "fonts/89999bdf5d835c012025.woff2",
+  "fonts/fa-v4compatibility.ttf": "fonts/da94ef451f4969af06e6.ttf",
+  "fonts/fa-v4compatibility.woff2": "fonts/ea8f94e1d22e0d35ccd4.woff2",
   "front.bundle.js.map": "front.bundle.js.map"
 }

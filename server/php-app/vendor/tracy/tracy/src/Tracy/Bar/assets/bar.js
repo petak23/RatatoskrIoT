@@ -629,7 +629,7 @@ function draggable(elem, options) {
 // returns total offset for element
 function getOffset(elem) {
 	let res = { left: elem.offsetLeft, top: elem.offsetTop };
-	while (elem = elem.offsetParent) { // eslint-disable-line no-cond-assign
+	while (elem = elem.offsetParent) {  
 		res.left += elem.offsetLeft;
 		res.top += elem.offsetTop;
 	}

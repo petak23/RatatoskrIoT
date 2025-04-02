@@ -2,11 +2,6 @@
 /* UPDATED 25.03.2025 */
 @use "sass:meta";
 
-<<<<<<< HEAD
-//@import 'bootstrap/dist/css/bootstrap.css';
-
-@import './main_menu.scss';
-=======
 @import "~@fortawesome/fontawesome-free/css/all.css";
 @import 'bootstrap/dist/css/bootstrap.css';
 @import 'bootstrap-vue-next/dist/bootstrap-vue-next.css';
@@ -16,4 +11,3 @@
 //@include meta.load-css('bwfoto.scss');
 //@include meta.load-css('pv_styles.scss');
 //@import 'vue_fotogalery.css';
->>>>>>> 3639a6675c6a06ba970741dd94aabb397ddfabb5

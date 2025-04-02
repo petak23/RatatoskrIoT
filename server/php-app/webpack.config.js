@@ -223,7 +223,7 @@ module.exports = {
 							implementation: require('sass'), // Používať `dart-sass`
 							sourceMap: false, // Môžeš zapnúť pre debugovanie
 							additionalData: `
-								@use "@/front/css/scss/variables.scss" as *; 
+								@use "@/css/scss/variables.scss" as *; 
 							`,// Globálne premenné
 						},
 					},

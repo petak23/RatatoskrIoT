@@ -7,19 +7,20 @@ namespace App\ApiModule\Model;
 //use App\Model;
 use App\Services\Logger;
 use Nette;
+use Nette\Database;
 use Nette\Database\Table\ActiveRow;
 use Nette\Utils\DateTime;
 
 /**
  * Model, ktory sa stara o tabulku devices
  * 
- * Posledna zmena 09.11.2023
+ * Posledna zmena 26.03.2025
  * 
  * @author     Ing. Peter VOJTECH ml. <petak23@gmail.com>
- * @copyright  Copyright (c) 2012 - 2023 Ing. Peter VOJTECH ml.
+ * @copyright  Copyright (c) 2012 - 2025 Ing. Peter VOJTECH ml.
  * @license
  * @link       http://petak23.echo-msz.eu
- * @version    1.0.6
+ * @version    1.0.7
  */
 class Devices
 {
@@ -74,7 +75,7 @@ class Devices
 			// Pridám zariadenie a k nemu načítam senzory
 			$rc->addWithSensors($dev, $this->pv_sensors->getDeviceSensors($row->id, $row->monitoring), $return_as_array);
 		}
-		return $return_as_array ? $rc->returnAsArray() : $rc;
+		return $return_as_array ? $rc->returnAsArray(false) : $rc;
 	}
 
 	/** Pridanie zariadenia */
@@ -201,13 +202,20 @@ class VDevices
 		}
 	}
 
-	public function returnAsArray(): array
+	public function returnAsArray(bool $with_index = true): array
 	{
 		$out = [];
 		foreach ($this->devices as $k => $v) {
-			$out[$k] = $v->attrs;
-			$out[$k]['problem_mark'] = $v->problem_mark;
-			$out[$k]['sensors'] = $v->sensors;
+			if ($with_index) {
+				$out[$k] = $v->attrs;
+				$out[$k]['problem_mark'] = $v->problem_mark;
+				$out[$k]['sensors'] = $v->sensors;
+			} else {
+				$out[] = array_merge($v->attrs, [
+					'problem_mark' => $v->problem_mark,
+					'sensors' => $v->sensors
+				]);
+			}
 		}
 		return $out;
 	}

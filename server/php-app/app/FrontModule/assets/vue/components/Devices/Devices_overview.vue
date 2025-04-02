@@ -1,43 +1,34 @@
-<script>
+<script setup>
 import { onMounted, ref } from 'vue'
 import MainService from '../../services/MainService'
 import dayjs from 'dayjs'; //https://day.js.org/docs/en/display/format
 
-export default {
-	setup () {
-		const items = ref(null)
+const items = ref(null)
 
-		onMounted(()=> {
-			getDevices();
+onMounted(()=> {
+	getDevices();
+})
+
+const format_date = (value) => {
+	const date = dayjs(value);
+	// Then specify how you want your dates to be formatted
+	return date.format('D.M.YYYY HH:mm:ss');
+}
+
+const getDevices = () => {
+	MainService.getDevices()
+		.then(response => {
+			console.log(response.data)
+			items.value = response.data
 		})
-		
-		const format_date = (value) => {
-			const date = dayjs(value);
-			// Then specify how you want your dates to be formatted
-			return date.format('D.M.YYYY HH:mm:ss');
-		}
-
-		const getDevices = () => {
-			MainService.getDevices()
-				.then(response => {
-					items.value = response.data
-				})
-				.catch((error) => {
-					//console.log(odkaz);
-					console.log(error);
-				});
-		}
-	
-		return { items, format_date }
-	}
+		.catch((error) => {
+			console.log(error);
+		})
 }
 </script>
 
-<template>
-	<div 
-		v-if="items != null"
-		v-for="item in items" :key="item.id" class="col"
-	>
+<template v-if="items != null">
+	<div v-for="item in items" :key="item.id" class="col">
 		<div class="card h-100 text-bg-dark border-warning">
 			<h5 class="card-header">
 				{{ item.name }}
