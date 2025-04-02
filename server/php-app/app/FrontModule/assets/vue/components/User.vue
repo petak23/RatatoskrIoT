@@ -1,20 +1,15 @@
-<script>
+<script setup>
 import { useMainStore } from '../store/main'
-import dayjs from 'dayjs'; //https://day.js.org/docs/en/display/format
+const store = useMainStore()
 
-export default {
-	setup () {
-		const store = useMainStore()
-		
-		const format_date = (value) => {
-			const date = dayjs(value);
-			// Then specify how you want your dates to be formatted
-			return date.format('D.M.YYYY HH:mm:ss');
-		}
-	
-		return { store, format_date }
-	}
-}
+//import dayjs from 'dayjs'; //https://day.js.org/docs/en/display/format
+
+// TODO over potrebu...
+/*const format_date = (value) => {
+	const date = dayjs(value)
+	// Then specify how you want your dates to be formatted
+	return date.format('D.M.YYYY HH:mm:ss');
+}*/
 </script>
 
 <template>
@@ -22,8 +17,7 @@ export default {
 	<div class="row px-2 bg-light" v-if="store.user.prev_login_time" >
 		<div class="col-12 col-md-3">Predošlé prihlásenie:</div>
 		<div class="col-12 col-md-9">
-				<b>{{ store.user.prev_login_time }}</b>
-				z IP adresy 
+				<b>{{ store.user.prev_login_time }}</b> z IP adresy 
 				<span v-if="store.user.prev_login_name">
 					{{ store.user.prev_login_ip }} (<b>{{ store.user.prev_login_name }}</b>)
 				</span>
@@ -35,9 +29,7 @@ export default {
 	<div class="row px-2" v-if="store.user.last_error_time">
 		<div class="col-12 col-md-3">Posledné neúspešné prihlásenie:</div>
 		<div class="col-12 col-md-9 text-danger">
-			<b>{{ store.user.last_error_time }}</b>
-			z IP adresy 
-			{if ($last_error_name)}
+			<b>{{ store.user.last_error_time }}</b> z IP adresy: 
 			<span v-if="store.user.last_error_name">
 				{{ store.user.last_error_ip }} (<b>{{ store.user.last_error_name }}</b>)
 			</span>
@@ -67,6 +59,7 @@ export default {
 
 	<div class="row px-2  pt-3">
 		<div class="col-12">
+			<!-- TODO links-->
 			<a :href="'Inventory:edit'" class="btn btn-outline-primary btn-sm" role="button">Zmeniť nastavenie</a>
 			<a :href="'Inventory:password'" class="btn btn-outline-primary btn-sm" role="button">Zmeniť heslo</a>
 		</div>
@@ -74,7 +67,9 @@ export default {
 
 	<div class="px-2 pb-2 pt-4" v-if="store.user.monitoring_token">
 		<h3>Monitoring</h3>
-		Dáta monitoringu sú dostupné tu: <b><a :href="store.user.monitoringUrl"> {{ store.user.monitoringUrl }}</a></b>
+		Dáta monitoringu sú dostupné tu: 
+		<!-- TODO link-->
+		<b><a :href="store.user.monitoringUrl"> {{ store.user.monitoringUrl }}</a></b>
 		<br />
 		<small>
 			Každý, kdo pozná túto URL, si môže data zobraziť. Prístup už ďalej <b>nieje chránený heslon</b>.
@@ -117,12 +112,9 @@ export default {
 	<div class="row px-2  pt-3">
 		<div class="col-12">
 			<RouterLink to="/devices" class="btn btn-outline-primary btn-sm" role="button">Zariadenia</RouterLink>
+			<!-- TODO link-->
 			<a :href="'View:views'" class="btn btn-outline-primary btn-sm" role="button">Grafy</a>
 		</div>
 	</div>
 </div>
 </template>
-
-
-<style lang="scss" scoped>
-</style>

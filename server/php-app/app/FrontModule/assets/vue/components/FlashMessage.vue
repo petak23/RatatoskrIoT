@@ -1,5 +1,7 @@
 <script>
 /**
+ * @deprecated !!!
+ * 
  * Komponenta pre vypísanie flash správ.
  * Posledna zmena 21.03.2023
  *

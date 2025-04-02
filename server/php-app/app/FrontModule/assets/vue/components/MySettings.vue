@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted } from 'vue'
-import { useMainStore } from '../store/main'
-import MainService from '../services/MainService';
+import MainService from '../services/MainService'
 
+import { useMainStore } from '../store/main'
 const store = useMainStore()
 
 const getMySettings = () => {
@@ -15,7 +15,7 @@ const getMySettings = () => {
 			store.minYear = response.data.minYear
 		})
 		.catch((error) => {
-			console.log(error);
+			console.error(error)
 		})
 }
 
@@ -25,12 +25,12 @@ const getActualUser = () => {
 			store.user = response.data
 		})
 		.catch((error) => {
-			console.log(error);
+			console.error(error)
 		})
 }
 
 onMounted(() => {
-	getMySettings();
-	getActualUser();
+	getMySettings()
+	getActualUser()
 })
 </script>

@@ -1,34 +1,27 @@
-<script>
+<script setup>
 import { onMounted, ref } from 'vue'
 import MainService from '../services/MainService'
 
-export default {
-	setup () {
+const items = ref(null)
 
-		const items = ref(null)
-
-		onMounted(()=> {
-			getUnits();
-		}) 
-
-		const getUnits = () => {
-			MainService.getUnits()
-				.then(response => {
-					items.value = response.data
-				})
-				.catch((error) => {
-					console.log(error);
-				});
-		}
-	
-		return { items }
-	}
+const getUnits = () => {
+	MainService.getUnits()
+		.then(response => {
+			items.value = response.data
+		})
+		.catch((error) => {
+			console.error(error)
+		})
 }
+
+onMounted(()=> {
+	getUnits();
+})
 </script>
 
 <template>
-	<div v-if="items != null" class="col-12 table">
-		<table>
+	<div v-if="items != null" class="col-12 table table-responsive">
+		<table class="table">
 			<tbody>
 				<tr>
 					<th>Id</th>
